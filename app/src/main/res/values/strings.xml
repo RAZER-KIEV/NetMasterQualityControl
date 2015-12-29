@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">NetMaster Quality Control</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_login">Login</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="title_activity_main">NetMaster QC</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_maps">Map</string>
+
+    <!-- MyDowmTask param names -->
+    <string name="title">title</string>
+    <string name="login">login</string>
+    <string name="employee">employee</string>
+    <string name="description">description</string>
+    <string name="gsonStr">gsonStr</string>
+    <string name="password">password</string>
+    <string name="urlTail">urlTail</string>
+    <string name="task">task</string>
+    <string name="emlpId">emlpId</string>
+    <string name="taskId">taskId</string>
+    <string name="urlStrValue">http://176.37.239.136:8082/</string>
+
+    <!-- Url Tails-->
+    <string name="loginTail">authAndroid</string>
+    <string name="creatTaskTail">task/addTask</string>
+    <string name="updateTask">task/updateTask</string>
+    <string name="addEmpl">employee/addEmpl</string>
+    <string name="updateEmpl">employee/updateEmpl</string>
+
+    <!-- Others -->
+    <string name="space"> </string>
+
+
+
+
+    <!-- Facebook -->
+    <string name="fb_id">540025372830220</string>
+
+    <!--Dialog -->
+    <string name="create_new_Task">Create new Task</string>
+    <string name="register">Register</string>
+    <string name="register_dialog_title">No such user found. Register new ?</string>
+
+
+</resources>
