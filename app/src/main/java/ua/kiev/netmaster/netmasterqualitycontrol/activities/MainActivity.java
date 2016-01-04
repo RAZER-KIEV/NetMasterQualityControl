@@ -30,13 +30,19 @@ import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.CreateRegisterDialog;
 import ua.kiev.netmaster.netmasterqualitycontrol.fragments.CreateTaskDialog;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.DeleteDialogFragment;
 import ua.kiev.netmaster.netmasterqualitycontrol.fragments.DetailsFragment;
 import ua.kiev.netmaster.netmasterqualitycontrol.fragments.EmloyeeFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.LogoutDialog;
 import ua.kiev.netmaster.netmasterqualitycontrol.fragments.TaskFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
+import ua.kiev.netmaster.netmasterqualitycontrol.service.MyService;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, CreateTaskDialog.AddTaskDialogCommunicator {
+        implements NavigationView.OnNavigationItemSelectedListener, CreateTaskDialog.AddTaskDialogCommunicator, DeleteDialogFragment.DeleteDialogFragComunicator, LogoutDialog.LogoutDialogCommunicator,
+        CreateRegisterDialog.RegisterDialogCommunicator {
 
     //private final String saveBtnTag="saveBtnTag", deleteBtnTag="deleteBtnTag", acceptBtnTag="acceptBtnTag", contactBtnTag="contactBtnTag";
     private static Employee employee;
@@ -45,6 +51,8 @@ public class MainActivity extends AppCompatActivity
     private ImageView userIconView;
     DrawerLayout drawer;
     NavigationView navigationView;
+    private static DetailsFragment detailsFragment;
+    private boolean serviceStarted;
     //private com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton cirkMenuFab;
 
 
@@ -127,7 +135,10 @@ Can you give me few lines of code here, how it must looks like.
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            //getSupportFragmentManager().
+            if(getSupportFragmentManager().getBackStackEntryCount()==0){
+                new LogoutDialog().show(getSupportFragmentManager(), "tag");
+            } else super.onBackPressed();
         }
     }
 
@@ -171,10 +182,12 @@ Can you give me few lines of code here, how it must looks like.
 
 
         } else if (id == R.id.manage_my_prof) {
-            commitFragment(DetailsFragment.newInstance(LoginActivity.getEmployee()),getSupportFragmentManager());
+            commitFragment(detailsFragment = DetailsFragment.newInstance(LoginActivity.getEmployee()),getSupportFragmentManager());
 
         } else if (id == R.id.nav_send) {
-
+            if(!serviceStarted){
+                startService(new Intent(this, MyService.class));
+            }
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -183,7 +196,7 @@ Can you give me few lines of code here, how it must looks like.
 
     public static void commitFragment(Fragment fragment, FragmentManager fragmentManager) {
         //if(fragment instanceof DetailsFragment)  .setVisibility(View.VISIBLE);
-        Log.d(LoginActivity.LOG, "MainActivity. commitFragment()");
+        Log.d(LoginActivity.LOG, "MainActivity. commitFragment() "+fragment.getClass());
         fragmentManager.popBackStack();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
@@ -210,8 +223,8 @@ Can you give me few lines of code here, how it must looks like.
             e.printStackTrace();
         }
         Toast.makeText(this,"Task created = " +res, Toast.LENGTH_LONG).show();
+        commitFragment(new TaskFragment(),getSupportFragmentManager());
     }
-
 
     public static Employee getEmployee() {
         return employee;
@@ -229,4 +242,51 @@ Can you give me few lines of code here, how it must looks like.
         MainActivity.task = task;
     }
 
+    public static DetailsFragment getDetailsFragment() {
+        return detailsFragment;
+    }
+
+    public static void setDetailsFragment(DetailsFragment detailsFragment) {
+        MainActivity.detailsFragment = detailsFragment;
+    }
+
+    @Override
+    public void delete(View v) {
+            if(v.getId()==R.id.create_dialog)
+           detailsFragment.emplOnClickDeleteParams();// TODO: 04.01.2016
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        L.l("onPause", this);
+        // TODO: 04.01.2016 Exit dialog. ?
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        L.l("onDestroy", this);
+    }
+
+    @Override
+    public void goToLoginActivity() {
+        L.l("goToLoginActivity()", this);
+        startActivity(new Intent(this, LoginActivity.class));
+    }
+
+    @Override
+    public void registerDialogData(String login, String password) {
+        Map<String,String> params = new HashMap<>();
+        params.put(getString(R.string.urlTail), getString(R.string.addEmpl));
+        params.put(getString(R.string.login),login);
+        params.put(getString(R.string.password), password);
+        try {
+            String res = new MyDownTask(params,this).execute().get();
+            Toast.makeText(this,"User created: " +res, Toast.LENGTH_LONG).show();
+            commitFragment(new EmloyeeFragment(),getSupportFragmentManager());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -2,6 +2,7 @@ package ua.kiev.netmaster.netmasterqualitycontrol.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,7 +27,7 @@ import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 /**
  * Created by ПК on 15.12.2015.
  */
-public class EmloyeeFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class EmloyeeFragment extends Fragment implements AdapterView.OnItemClickListener, View.OnClickListener {
 
     public static final String TAG = "EmloyeeFragmentTag";
     private String result;
@@ -35,6 +36,7 @@ public class EmloyeeFragment extends Fragment implements AdapterView.OnItemClick
     private TypeToken<List<Employee>> tokenEmpl;
     //private MyDownTask myDownTask;
     private ListView listView;
+    private FloatingActionButton fab;
 
 
     @Override
@@ -67,6 +69,9 @@ public class EmloyeeFragment extends Fragment implements AdapterView.OnItemClick
 
         tokenEmpl =  new TypeToken<List<Employee>>(){};
         listView = (ListView)getActivity().findViewById(R.id.taskListView);
+
+        fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        fab.setOnClickListener(this);
 
 
         try {
@@ -139,6 +144,15 @@ public class EmloyeeFragment extends Fragment implements AdapterView.OnItemClick
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
        L.l(this.getClass().toString() + "EmloyeeFragment. onItemClick()");
-        MainActivity.commitFragment(DetailsFragment.newInstance(emplList.get(i)), getFragmentManager());
+        MainActivity.setDetailsFragment(DetailsFragment.newInstance(emplList.get(i)));
+        MainActivity.commitFragment(MainActivity.getDetailsFragment(), getFragmentManager());
+    }
+
+    @Override
+    public void onClick(View view) {
+        CreateRegisterDialog createRegisterDialog = CreateRegisterDialog.newInstance(getString(R.string.create_new_empl));
+        //createRegisterDialog.setTitle(getString(R.string.create_new_empl));
+        createRegisterDialog.show(getActivity().getFragmentManager(), "tag");
+        //MainActivity.commitFragment(new EmloyeeFragment(),getFragmentManager());
     }
 }

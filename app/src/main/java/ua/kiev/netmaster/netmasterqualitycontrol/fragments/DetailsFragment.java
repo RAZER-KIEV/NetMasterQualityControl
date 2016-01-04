@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
+import ua.kiev.netmaster.netmasterqualitycontrol.activities.MainActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
@@ -57,6 +58,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     public static DetailsFragment newInstance(Task task) {
         L.l("DetailsFragment.newInstance(Task task)");
         DetailsFragment f = new DetailsFragment();
+        L.l("-----------------------"+String.valueOf(f.getId()));
         Bundle args = new Bundle();
         if(task!=null){
             args.putString("arg", "task");
@@ -128,6 +130,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDetach() {
         super.onDetach();
+        L.l("onDetach ", this );
     }
 
     @Override
@@ -174,7 +177,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     }
 
     private void taskOnClickDeleteParams(){
-        L.l("taskOnClickDeleteParams",this);
+        L.l("taskOnClickDeleteParams", this);
         params.put(getString(R.string.taskId), changedTask.getTaskId().toString());
         sendRequest(params);
     }
@@ -186,7 +189,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         sendRequest(params);
     }
 
-    private void emplOnClickDeleteParams(){
+    public void emplOnClickDeleteParams(){
         L.l("emplOnClickAcceptParams()", this);
         params.put(getString(R.string.emlpId), changedEmployee.getId().toString());
         sendRequest(params);
@@ -213,13 +216,13 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         params.clear();
         if(!isTaskMode){
-            L.l("onClick. !isTaskMode");
+            L.l("DetailsFragment. onClick() !isTaskMode");
             compileChengedEmpl();
             switch (view.getTag().toString()){
                 case  "deleteBtnTag" :
-                    emplOnClickDeleteParams();
-                    L.t("deleted "+response, getActivity());
-                    break;
+                    new DeleteDialogFragment().show(getFragmentManager(), "deleteEmplTag");
+                    //L.t("deleted "+response, getActivity());
+                    return;
                 case "saveBtnTag" :
                     emplOnClickSaveParams();
                     L.t("saved. "+response, getActivity());
@@ -236,15 +239,17 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
             switch (view.getTag().toString()){
                 case  "deleteBtnTag" :
                     taskOnClickDeleteParams();
-                    L.t("deleteBtnTag pressed", getActivity());
+                    L.t("DELETED", getActivity());
+                    MainActivity.commitFragment(new TaskFragment(),getFragmentManager());
                     break;
                 case "saveBtnTag" :
                     taskOnClickSave();
-                    L.t("saved. "+ response, getActivity());
+                    L.t( response, getActivity());
                     break;
                 case  "acceptBtnTag" :
                     taskOnClicAcceptParams();
-                    L.t("accepted "+response, getActivity()); // TODO: 29.12.2015 migrate data setting to server! 
+                    L.t("accepted " + response, getActivity()); // TODO: 29.12.2015 migrate data setting to server!
+                    MainActivity.commitFragment( new TaskFragment(), getFragmentManager());
                     break;
             }
         }
@@ -318,7 +323,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         SubActionButton contactBtn = itemBuilder.setContentView(contactImg).build();
         contactBtn.setOnClickListener(this);
         contactBtn.setTag(contactBtnTag);
-        L.l("initMyFab(). isTaskMode="+isTaskMode, this);
+        L.l("initMyFab(). isTaskMode=" + isTaskMode, this);
         FloatingActionMenu.Builder builder = new FloatingActionMenu.Builder(getActivity())
                 .addSubActionView(deleteBtn)
                 .addSubActionView(saveBtn);
@@ -408,5 +413,17 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         for (int i = 0; i < 12; i++) {
             editTexts[i].setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        L.l("onDestroy", this);
+    }
+
+
+
+    public interface DetailsCommunicator{
+        void delete(View v);
     }
 }

@@ -27,8 +27,8 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
 
     private Gson gson;
     private Context context;
-    private String login, result, inputLine, gsonString, query, password, title, description, employee, task, taskId, urlStr = "http://176.37.239.136:8082/";
-    private final String LOGIN="login", PASSWORD="password", GSONSTRING="gsonString", TITLE="title", DESCRIPTION="description", URLSTR="urlTail", EMPLOYEE="employee", TASK="task", TASKID="taskId";
+    private String login, result, inputLine, gsonString, query, password, title, description, employee, task, taskId, emlpId, urlStr = "http://176.37.239.136:8082/";
+    private final String LOGIN="login", PASSWORD="password", GSONSTRING="gsonString", TITLE="title", DESCRIPTION="description", URLSTR="urlTail", EMPLOYEE="employee", TASK="task", EMPLID="emlpId", TASKID="taskId";
     private Map<String,String> params;
     private URL url;
     private HttpURLConnection con;
@@ -65,6 +65,7 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         employee = params.get(EMPLOYEE);
         task = params.get(TASK);
         taskId = params.get(TASKID);
+        emlpId = params.get(EMPLID);
         if(params.get(URLSTR)==null)    choseUrlTail();
          else urlStr+=params.get(URLSTR);
     }
@@ -99,11 +100,12 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
     }
 
     private void choseUrlTail(){
-        if(login!=null){ urlStr+= "authAndroid";}
-        if(title!=null){ urlStr+="task/addTask";}
-        if(employee!=null){urlStr+="employee/updateEmpl";}
-        if(task!=null){ urlStr+="task/updateTask";}
-        if(taskId!=null) { urlStr+="task/deleteTask";}
+        if(login!=null) urlStr+= "authAndroid";
+        if(title!=null) urlStr+="task/addTask";
+        if(employee!=null)urlStr+="employee/updateEmpl";
+        if(task!=null) urlStr+="task/updateTask";
+        if(taskId!=null) urlStr+="task/deleteTask";
+        if(emlpId!=null) urlStr+="employee/deleteEmpl";
     }
 
     public String connect() {
@@ -182,6 +184,7 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
             if(employee!=null) builder.appendQueryParameter(EMPLOYEE, employee);
             if(task!=null) builder.appendQueryParameter(TASK, task);
             if(taskId!=null) builder.appendQueryParameter(TASKID, taskId);
+            if(emlpId!=null) builder.appendQueryParameter(EMPLID, emlpId);
 
             query = builder.build().getEncodedQuery();
             Log.d(LoginActivity.LOG, "connect(). String query = "+query);
