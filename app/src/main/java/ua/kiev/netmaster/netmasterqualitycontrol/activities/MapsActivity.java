@@ -10,10 +10,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.List;
+
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
+import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
+import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.EmloyeeFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.TaskFragment;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-
+    
+    private List<Task> taskList;
+    private List<Employee> employeeList;
+    
     private GoogleMap mMap;
 
     @Override
@@ -24,6 +33,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        
+        taskList= TaskFragment.getTaskList();
+        employeeList = EmloyeeFragment.getEmplList();
     }
 
 
@@ -44,5 +56,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+    
+    private void makeMarkers(){
+        for (Task task:taskList){
+            if(task.getLatitude()!=null&task.getLongitude()!=null){
+                LatLng ll= new LatLng(Double.parseDouble(task.getLatitude()),Double.parseDouble(task.getLongitude()));
+                mMap.addMarker( new MarkerOptions().position(ll).title(task.getTitle()));
+            }
+        }
+        for(Employee employee: employeeList){
+            if(employee.getLastlongLat()!=null){
+                // TODO: 05.01.2016  LongLat -> LatLong! 
+            }
+        }
     }
 }

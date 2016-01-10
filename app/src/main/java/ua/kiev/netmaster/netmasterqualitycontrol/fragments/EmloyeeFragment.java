@@ -151,8 +151,7 @@ public class EmloyeeFragment extends Fragment implements AdapterView.OnItemClick
     @Override
     public void onClick(View view) {
         CreateRegisterDialog createRegisterDialog = CreateRegisterDialog.newInstance(getString(R.string.create_new_empl));
-        //createRegisterDialog.setTitle(getString(R.string.create_new_empl));
         createRegisterDialog.show(getActivity().getFragmentManager(), "tag");
-        //MainActivity.commitFragment(new EmloyeeFragment(),getFragmentManager());
+
     }
 }

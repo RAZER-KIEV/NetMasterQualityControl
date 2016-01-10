@@ -29,7 +29,7 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
 
     private Task task;
     private String result;
-    private List<Task> taskList;
+    private static  List<Task> taskList;
     private TaskAdapter taskAdapter;
     private TypeToken<List<Task>> tokenTask;
     private MyDownTask myDownTask;
@@ -140,5 +140,9 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
     public void onClick(View view) {
         if(view.getId()!=R.id.fab) return;
             new CreateTaskDialog().show(getFragmentManager(),"AddTaskDialog");
+    }
+
+    public static List<Task> getTaskList() {
+        return taskList;
     }
 }
