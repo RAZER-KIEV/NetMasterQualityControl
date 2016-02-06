@@ -155,7 +155,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         changedEmployee = new Employee(employee.getId(),editTexts[2].getText().toString(),editTexts[0].getText().toString(),editTexts[1].getText().toString(), editTexts[3].getText().toString(),
                 editTexts[4].getText().toString(), editTexts[5].getText().toString(), employee.getRegdate(), Integer.valueOf(editTexts[7].getText().toString()),
                 Integer.valueOf(editTexts[8].getText().toString()), Boolean.valueOf(editTexts[9].getText().toString()), Boolean.valueOf(editTexts[6].getText().toString()),
-                employee.getLastlongLat(), employee.getLastOnline());
+                employee.getLastLat(),employee.getLastLong(), employee.getLastOnline());
         Log.d(LoginActivity.LOG, "DetailsFragment. change Empl" + changedEmployee.toString());
     }
 

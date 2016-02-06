@@ -23,7 +23,8 @@ public class Employee {
     private Integer bonusSumm;
     private Boolean isBlocked;
     private Boolean isBusy;
-    private Double[] lastlongLat;
+    private Double lastLat;
+    private Double lastLong;
     private Date lastOnline;
 
     public Employee() {
@@ -36,7 +37,7 @@ public class Employee {
         isBusy = false;
     }
 
-    public Employee(Long id,String position, String login, String password, String inn, String phone, String home, Date regdate, Integer wrongPass, Integer bonusSumm, Boolean isBlocked, Boolean isBusy, Double[] lastlongLat, Date lastOnline) {
+    public Employee(Long id, String position, String login, String password, String inn, String phone, String home, Date regdate, Integer wrongPass, Integer bonusSumm, Boolean isBlocked, Boolean isBusy, Double lastLat, Double lastLong, Date lastOnline) {
         this.id = id;
         this.position = position;
         this.login = login;
@@ -49,7 +50,8 @@ public class Employee {
         this.bonusSumm = bonusSumm;
         this.isBlocked = isBlocked;
         this.isBusy = isBusy;
-        this.lastlongLat = lastlongLat;
+        this.lastLat = lastLat;
+        this.lastLong = lastLong;
         this.lastOnline = lastOnline;
     }
 
@@ -109,6 +111,14 @@ public class Employee {
         this.home = home;
     }
 
+    public Date getRegdate() {
+        return regdate;
+    }
+
+    public void setRegdate(Date regdate) {
+        this.regdate = regdate;
+    }
+
     public Integer getWrongPass() {
         return wrongPass;
     }
@@ -141,20 +151,20 @@ public class Employee {
         this.isBusy = isBusy;
     }
 
-    public Double[] getLastlongLat() {
-        return lastlongLat;
+    public Double getLastLat() {
+        return lastLat;
     }
 
-    public void setLastlongLat(Double[] lastlongLat) {
-        this.lastlongLat = lastlongLat;
+    public void setLastLat(Double lastLat) {
+        this.lastLat = lastLat;
     }
 
-    public Date getRegdate() {
-        return regdate;
+    public Double getLastLong() {
+        return lastLong;
     }
 
-    public void setRegdate(Date regdate) {
-        this.regdate = regdate;
+    public void setLastLong(Double lastLong) {
+        this.lastLong = lastLong;
     }
 
     public Date getLastOnline() {
@@ -180,7 +190,8 @@ public class Employee {
                 ", bonusSumm=" + bonusSumm +
                 ", isBlocked=" + isBlocked +
                 ", isBusy=" + isBusy +
-                ", lastlongLat=" + Arrays.toString(lastlongLat) +
+                ", lastLat=" + lastLat +
+                ", lastLong=" + lastLong +
                 ", lastOnline=" + lastOnline +
                 '}';
     }

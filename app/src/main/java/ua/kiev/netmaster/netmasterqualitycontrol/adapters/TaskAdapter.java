@@ -55,8 +55,6 @@ public class TaskAdapter extends BaseAdapter {
         ((TextView) view.findViewById(R.id.isbusy_priority2)).setText("priority: "+task.getPriority());
         ((TextView) view.findViewById(R.id.lastOnline_Adress2)).setText(task.getAddress());
         ((TextView) view.findViewById(R.id.tel_description2)).setText(task.getDescription());
-
-
         return view;
     }
 

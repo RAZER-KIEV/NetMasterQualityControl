@@ -36,14 +36,8 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
     private OutputStream os;
     private BufferedWriter writer;
     private BufferedReader in;
-
-
     private StringBuilder responses;
-
-    //private String result;
     public static boolean isReachable;
-
-    //private Long orderId;
 
     public MyDownTask(String urlTeil, String login, String password, Context context) {
         urlStr += urlTeil;
@@ -162,6 +156,18 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         return result;
     }
 
+    private void appendQueryParameters(){
+        if(login!=null) builder.appendQueryParameter(LOGIN, login);
+        if(password!=null)builder.appendQueryParameter(PASSWORD, password);
+        if(gsonString!=null)builder.appendQueryParameter(GSONSTRING,gsonString);
+        if(title!=null)builder.appendQueryParameter(TITLE,title);
+        if(description!=null) builder.appendQueryParameter(DESCRIPTION, description);
+        if(employee!=null) builder.appendQueryParameter(EMPLOYEE, employee);
+        if(task!=null) builder.appendQueryParameter(TASK, task);
+        if(taskId!=null) builder.appendQueryParameter(TASKID, taskId);
+        if(emlpId!=null) builder.appendQueryParameter(EMPLID, emlpId);
+    }
+
     private String commonConnect() {
         Log.d(LoginActivity.LOG, "MyDownTask. commonConnect()");
         CookieHandler.getDefault();
@@ -175,17 +181,7 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
             con.setDoInput(true);
             con.setDoOutput(true);
             builder = new Uri.Builder();
-
-            if(login!=null) builder.appendQueryParameter(LOGIN, login);
-            if(password!=null)builder.appendQueryParameter(PASSWORD, password);
-            if(gsonString!=null)builder.appendQueryParameter(GSONSTRING,gsonString);
-            if(title!=null)builder.appendQueryParameter(TITLE,title);
-            if(description!=null) builder.appendQueryParameter(DESCRIPTION, description);
-            if(employee!=null) builder.appendQueryParameter(EMPLOYEE, employee);
-            if(task!=null) builder.appendQueryParameter(TASK, task);
-            if(taskId!=null) builder.appendQueryParameter(TASKID, taskId);
-            if(emlpId!=null) builder.appendQueryParameter(EMPLID, emlpId);
-
+            appendQueryParameters();
             query = builder.build().getEncodedQuery();
             Log.d(LoginActivity.LOG, "connect(). String query = "+query);
             os = con.getOutputStream();

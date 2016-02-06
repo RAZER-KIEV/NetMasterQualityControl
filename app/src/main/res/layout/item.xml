@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_margin="1dp"
+    android:background="@drawable/items_shape_rounded"
+    android:padding="5dp"
     >
 
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tableRow"
-        android:background="#cfda6e"
         android:layout_marginTop="1dp">
 
         <TextView
@@ -21,7 +22,9 @@
             android:textAlignment="center"
             android:clickable="false"
             android:padding="2dp"
-            android:layout_weight=".3" />
+            android:layout_weight=".3"
+            android:textColor="@color/primary_text"
+            />
 
         <TextView
             android:layout_width="wrap_content"
@@ -32,7 +35,9 @@
             android:textAlignment="center"
             android:clickable="false"
             android:padding="2dp"
-            android:layout_weight=".3" />
+            android:layout_weight=".3"
+            android:textColor="@color/primary_text"
+            />
 
         <TextView
             android:layout_width="wrap_content"
@@ -42,8 +47,8 @@
             android:padding="5dp"
             android:textAlignment="center"
             android:id="@+id/lastOnline_Adress"
-
-            android:layout_weight=".3" />
+            android:layout_weight=".3"
+            android:textColor="@color/primary_text"/>
     </TableRow>
 
     <TableRow
@@ -62,7 +67,8 @@
             android:layout_weight="1"
             android:padding="2dp"
             android:textAlignment="center"
-            android:background="#72f695" />
+            android:textColor="@color/primary_text"
+            />
     </TableRow>
 
 </RelativeLayout>

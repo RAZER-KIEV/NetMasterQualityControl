@@ -15,9 +15,9 @@
             android:icon="@drawable/ic_map_marker_multiple"
             android:title="Map" />
         <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_service"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Settings" />
+            android:title="Start/Stop service" />
     </group>
 
     <item android:title="My profile">
@@ -27,9 +27,9 @@
                 android:icon="@drawable/ic_account_convert"
                 android:title="Manage My Profile" />
             <item
-                android:id="@+id/nav_send"
+                android:id="@+id/nav_logOut"
                 android:icon="@drawable/ic_menu_send"
-                android:title="Communications" />
+                android:title="Log Out" />
         </menu>
     </item>
 

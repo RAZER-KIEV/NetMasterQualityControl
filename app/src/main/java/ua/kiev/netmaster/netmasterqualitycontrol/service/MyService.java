@@ -14,12 +14,21 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.gson.Gson;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
+import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MainActivity;
+import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
+import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
+import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 public class MyService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
@@ -27,33 +36,38 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
     private Notification notification2;
     private Timer timer;
     private TimerTask tTask;
-    private long interval = 3000;
+    private long interval = 30000;
 
+    private Employee me;
     private GoogleApiClient mGoogleApiClient;
     private boolean mResolvingError = false;
-    private static String LOG_TAG ="myLogs";
+    //private static String LOG_TAG ="myLogs";
     private Location mLastLocation;
     private MyBinder binder = new MyBinder();
+    private Gson gson;
+    private String result;
 
 
     public void onCreate() {
         super.onCreate();
-        Log.d(LOG_TAG, "MyService onCreate");
+        L.l("MyService onCreate");
+        me = LoginActivity.getEmployee();
+        L.l(me.toString());
+        gson = LoginActivity.gson;
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         timer = new Timer();
-
         buildGoogleApiClient();
     }
 
     public void onDestroy() {
-        Log.d(LOG_TAG, "MyService onDestroy");
+        L.l("MyService onDestroy");
         mGoogleApiClient.disconnect();
         super.onDestroy();
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        Log.d(LOG_TAG, "MyService onStartCommand");
+        L.l("MyService onStartCommand");
         sendNotif(startId);
         startForeground(startId, notification2);
 
@@ -75,24 +89,23 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
     }
 
     public IBinder onBind(Intent intent) {
-        Log.d(LOG_TAG, "MyService onBind");
+        L.l("MyService onBind");
         return binder;
     }
 
     public void onRebind(Intent intent) {
         super.onRebind(intent);
-        Log.d(LOG_TAG, "MyService onRebind");
+        L.l("MyService onRebind");
     }
 
     public boolean onUnbind(Intent intent) {
-        Log.d(LOG_TAG, "MyService onUnbind");
+        L.l("MyService onUnbind");
         return super.onUnbind(intent);
     }
 
 
     void schedule() {
-        Log.d(LOG_TAG, "MyService schedule");
-
+        L.l("MyService schedule");
         if (tTask != null) tTask.cancel();
         if (interval > 0) {
             tTask = new TimerTask() {
@@ -105,10 +118,9 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
     }
 
     void sendNotif(int startId) {
-        Log.d(LOG_TAG, "MyService sendNotif()");
+        L.l("MyService sendNotif()");
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
         // 1-я часть
         notification2 = new Notification.Builder(this)
                 .setContentText("Text in status bar")
@@ -122,46 +134,62 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
                 .build();
 
         notification2.flags |= Notification.FLAG_NO_CLEAR;
-
         notificationManager.notify(startId, notification2);
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-        Log.d(LOG_TAG, "MyService.  onConnected()");
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
+        L.l("MyService.  onConnected()");
+       try {
+           mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                   mGoogleApiClient);
+       }catch (SecurityException ex){
+           ex.printStackTrace();
+       }
         if (mLastLocation != null) {
-            Log.d(LOG_TAG, String.valueOf(mLastLocation.getLatitude()));
-            Log.d(LOG_TAG, String.valueOf(mLastLocation.getLongitude()));
+            L.l(String.valueOf(mLastLocation.getLatitude()));
+            L.l(String.valueOf(mLastLocation.getLongitude()));
         }
-
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.d(LOG_TAG, "MyService.  onConnectionSuspended()");
+        L.l("MyService.  onConnectionSuspended()");
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(LOG_TAG, "MyService.  onConnectionFailed()");
+        L.l("MyService.  onConnectionFailed()");
     }
 
     private void testLocation(){
-        Log.d(LOG_TAG, "MyService.  testLocation()");
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
+        L.l("MyService.  testLocation()");
+       try {
+           mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                   mGoogleApiClient);
+       }catch (SecurityException ex){
+           ex.printStackTrace();
+       }
         if (mLastLocation != null) {
-            Log.d(LOG_TAG, String.valueOf(mLastLocation.getLatitude()));
-            Log.d(LOG_TAG, String.valueOf(mLastLocation.getLongitude()));
+            L.l(String.valueOf(mLastLocation.getLatitude()));
+            L.l(String.valueOf(mLastLocation.getLongitude()));
+            me.setLastLat(mLastLocation.getLatitude());
+            me.setLastLong(mLastLocation.getLongitude());
+            me.setLastOnline(new Date()); // TODO: 2/5/2016 migrate to server
+            Map<String,String> params = new HashMap<>();
+            params.put(getString(R.string.employee), gson.toJson(me));
+            try {
+                result = new MyDownTask(params,this).execute().get();
+                L.l("my location updated on server = "+result);
+            } catch (InterruptedException|ExecutionException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public Location getmLastLocation(){
         return mLastLocation;
     }
-
 
     public class MyBinder extends Binder {
         public MyService getService() {

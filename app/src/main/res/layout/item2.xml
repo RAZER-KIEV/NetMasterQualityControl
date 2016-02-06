@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:background="@drawable/items_shape_rounded"
+    android:padding="5dp">
 
     <TextView
         android:layout_width="@dimen/abc_action_bar_stacked_tab_max_width"
@@ -12,7 +14,6 @@
         android:layout_row="0"
         android:layout_column="0"
         android:layout_gravity="left"
-        android:background="@color/item1"
         android:textColor="@color/primary_text" />
 
     <TextView
@@ -24,7 +25,6 @@
         android:layout_row="0"
         android:layout_column="1"
         android:layout_gravity="left|right"
-        android:background="@color/item2"
         android:textColor="@color/primary_text" />
 
     <TextView
@@ -35,7 +35,6 @@
         android:id="@+id/isbusy_priority2"
         android:layout_row="1"
         android:layout_column="0"
-        android:background="@color/item2"
         android:layout_gravity="left|right"
         android:textColor="@color/primary_text" />
 
@@ -48,6 +47,5 @@
         android:layout_row="1"
         android:layout_column="1"
         android:layout_gravity="left|right"
-        android:background="@color/item3"
         android:textColor="@color/primary_text" />
 </GridLayout>

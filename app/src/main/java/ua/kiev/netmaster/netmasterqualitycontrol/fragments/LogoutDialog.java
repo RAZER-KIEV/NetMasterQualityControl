@@ -23,6 +23,7 @@ public class LogoutDialog extends DialogFragment implements View.OnClickListener
     private EditText loginEt, passwordEt;
     private LogoutDialogCommunicator logoutDialogCommunicator;
     private TextView loginTv, passwordTv, dialogTitleTv;
+    private static boolean exit=false;
 
     @Override
     public void onAttach(Activity activity) {

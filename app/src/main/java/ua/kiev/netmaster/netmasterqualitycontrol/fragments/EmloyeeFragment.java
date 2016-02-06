@@ -34,7 +34,6 @@ public class EmloyeeFragment extends Fragment implements AdapterView.OnItemClick
     private static List<Employee> emplList;
     private EmplAdapter emplkAdapter;
     private TypeToken<List<Employee>> tokenEmpl;
-    //private MyDownTask myDownTask;
     private ListView listView;
     private FloatingActionButton fab;
 
@@ -66,26 +65,24 @@ public class EmloyeeFragment extends Fragment implements AdapterView.OnItemClick
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Log.d(LoginActivity.LOG, "EmloyeeFragment. onActivityCreated()");
-
-        tokenEmpl =  new TypeToken<List<Employee>>(){};
-        listView = (ListView)getActivity().findViewById(R.id.taskListView);
-
+        tokenEmpl = new TypeToken<List<Employee>>() {};
+        listView = (ListView) getActivity().findViewById(R.id.taskListView);
         fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.setOnClickListener(this);
+        updateEmplList();
+        emplkAdapter = new EmplAdapter(getActivity().getApplicationContext(), emplList);
+        listView.setAdapter(emplkAdapter);
+        listView.setOnItemClickListener(this);
+    }
 
-
+    public List<Employee> updateEmplList(){
         try {
             result = new MyDownTask("employee/getAll", getActivity().getApplicationContext()).execute().get();
             emplList = LoginActivity.gson.fromJson(result, tokenEmpl.getType());
-            emplkAdapter = new EmplAdapter(getActivity().getApplicationContext(), emplList);
-            listView.setAdapter(emplkAdapter);
-            listView.setOnItemClickListener(this);
-
-
-        } catch (InterruptedException| ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-
+        return emplList;
     }
 
     @Override
@@ -152,6 +149,9 @@ public class EmloyeeFragment extends Fragment implements AdapterView.OnItemClick
     public void onClick(View view) {
         CreateRegisterDialog createRegisterDialog = CreateRegisterDialog.newInstance(getString(R.string.create_new_empl));
         createRegisterDialog.show(getActivity().getFragmentManager(), "tag");
+    }
 
+    interface EmploeeFragmCommunicator{
+        List<Employee> updateEmployes();
     }
 }

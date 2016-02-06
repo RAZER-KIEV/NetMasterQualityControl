@@ -83,8 +83,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
     public static final String LOG = "myLogs";
     private LoginButton loginButton;
     private static Profile profile;
-    //private AccessTokenTracker mTokenTracker;
-    //private ProfileTracker mProfileTracker;
     private FragmentManager manager;
 
     //FB

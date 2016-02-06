@@ -1,7 +1,11 @@
 package ua.kiev.netmaster.netmasterqualitycontrol.activities;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -52,9 +56,12 @@ public class MainActivity extends AppCompatActivity
     DrawerLayout drawer;
     NavigationView navigationView;
     private static DetailsFragment detailsFragment;
-    private boolean serviceStarted;
-    //private com.oguzdev.circularfloatingactionmenu.library.FloatingActionButton cirkMenuFab;
-
+    private boolean serviceStarted, bound;
+    private ServiceConnection sConn;
+    private MyService myService;
+    private Map<Employee, Location> employeeLocationMap;
+    private Intent intent;
+    private static EmloyeeFragment emloyeeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,10 +72,11 @@ public class MainActivity extends AppCompatActivity
         //initFragments();
         CookieHandler.getDefault();
         this.employee = LoginActivity.getEmployee();
+        servicePrepare();
         Log.d(LoginActivity.LOG, "MainActivity. onCreate() this.employee ="+employee);
     }
 
-    private void setFbProfile() {
+   /* private void setFbProfile() {
         Log.d(LoginActivity.LOG, "MainActivity. setFbProfile()");
         // TODO: 24.12.2015
         //NavigationView l = (NavigationView) findViewById(R.id.nav_view);
@@ -76,13 +84,6 @@ public class MainActivity extends AppCompatActivity
         //profileNameTv1 = (TextView) drawer.findViewById(R.id.profileNameTv);   //null
         //profileNameTv1 = (TextView) navigationView.findViewById(R.id.profileNameTv); //null
         //profileNameTv1 = (TextView) findViewById(R.id.profileNameTv); //null
-        /*
-       Thanks, bro!
-One question: how to setText on the TextView which lays in the header of drawler. (Set name or email)?
-The problem is how to get access to this View.
-It is not accessable by using findViewById simply. I tried in different combinations and always get NullPointerEx... And i also find nothing on stackoverflov.com.
-Can you give me few lines of code here, how it must looks like.
-        * */
         profileNameTv1 = (TextView) findViewById(R.id.profileNameTv);
             if(profileNameTv1==null) {
             Log.d(LoginActivity.LOG, "MainActivity. setFbProfile()  profileNameTv11==null; profileNameTv1 = "+profileNameTv1);
@@ -95,8 +96,55 @@ Can you give me few lines of code here, how it must looks like.
             Log.d(LoginActivity.LOG, "MainActivity. setFbProfile()  MainActivity.getEmployee()!=null");
             profileNameTv1.setText(employee.getLogin()+" "+employee.getPosition());
         }
+    }*/
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        L.l("MainActivity. onStart()");
+        //intent = new Intent(this, MyService.class);
+        onClickStartStop();
+        bindService(new Intent(this, MyService.class), sConn, 0);
+
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        L.l("MainActivity. onStop()");
+        if (!bound) return;
+        unbindService(sConn);
+        bound = false;
+    }
+
+    private void servicePrepare(){
+        L.l("MainActivity. servicePrepare()");
+        //Service prepare.
+        sConn = new ServiceConnection() {
+            public void onServiceConnected(ComponentName name, IBinder binder) {
+                L.l("MainActivity onServiceConnected");
+                myService = ((MyService.MyBinder) binder).getService();
+                bound = true;
+            }
+            public void onServiceDisconnected(ComponentName name) {
+                L.l("MainActivity onServiceDisconnected");
+                bound = false;
+            }
+        };
+    }
+
+    public void onClickStartStop() {
+        L.l("MainActivity.  onClickStart()");
+        if(!serviceStarted){
+            startService(intent=new Intent(this, MyService.class));
+            serviceStarted=true;
+        }else {
+            stopService(intent);
+            serviceStarted=false;
+        }
+        L.t("Service works = "+serviceStarted,this);
+    }
 
     private void initViews(){
         Log.d(LoginActivity.LOG, "MainActivity. initViews()");
@@ -110,13 +158,11 @@ Can you give me few lines of code here, how it must looks like.
                         .setAction("Action", null).show();
             }
         });
-
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
     }
@@ -124,13 +170,12 @@ Can you give me few lines of code here, how it must looks like.
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(LoginActivity.LOG, "MainActivity. onResume()");
-        //setFbProfile();
+        L.l("MainActivity. onResume()");
     }
 
     @Override
     public void onBackPressed() {
-        Log.d(LoginActivity.LOG, "MainActivity. onBackPressed()");
+        L.l("MainActivity. onBackPressed()");
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -145,7 +190,7 @@ Can you give me few lines of code here, how it must looks like.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.activity_main_drawer, menu);
         return true;
     }
 
@@ -154,40 +199,34 @@ Can you give me few lines of code here, how it must looks like.
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+       /* int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
+        return super.onOptionsItemSelected(item);*/
+        onNavigationItemSelected(item);
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        Log.d(LoginActivity.LOG, "MainActivity. onNavigationItemSelected()");
+        L.l("MainActivity. onNavigationItemSelected()");
         int id = item.getItemId();
-
         if (id == R.id.nav_tasks) {
             commitFragment(new TaskFragment(), getSupportFragmentManager());
         } else if (id == R.id.nav_employees) {
-
             commitFragment(new EmloyeeFragment(), getSupportFragmentManager());
-
         } else if (id == R.id.nav_map) {
             Intent intent = new Intent(this, MapsActivity.class);
             startActivity(intent);
-
-
         } else if (id == R.id.manage_my_prof) {
             commitFragment(detailsFragment = DetailsFragment.newInstance(LoginActivity.getEmployee()),getSupportFragmentManager());
-
-        } else if (id == R.id.nav_send) {
-            if(!serviceStarted){
-                startService(new Intent(this, MyService.class));
-            }
+        } else if (id == R.id.nav_service) {
+            onClickStartStop();
+        } else if (id == R.id.nav_logOut){
+            goToLoginActivity();
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -196,8 +235,9 @@ Can you give me few lines of code here, how it must looks like.
 
     public static void commitFragment(Fragment fragment, FragmentManager fragmentManager) {
         //if(fragment instanceof DetailsFragment)  .setVisibility(View.VISIBLE);
-        Log.d(LoginActivity.LOG, "MainActivity. commitFragment() "+fragment.getClass());
-        fragmentManager.popBackStack();
+        L.l("MainActivity. commitFragment() " + fragment.getClass());
+        //fragmentManager.popBackStack();
+        if(fragment instanceof EmloyeeFragment)emloyeeFragment = (EmloyeeFragment)fragment;
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         fragmentTransaction.replace(R.id.contentLayout, fragment);
@@ -205,15 +245,11 @@ Can you give me few lines of code here, how it must looks like.
         fragmentTransaction.commit();
     }
 
-
-
-
-
     @Override
     public void onAddTaskDialogData(String title, String description) {
-        Log.d(LoginActivity.LOG, "MainActivity. onAddTaskDialogData()");
+        L.l("MainActivity. onAddTaskDialogData()");
         Map<String,String> params = new HashMap<>();
-        params.put(getString(R.string.title),title);
+        params.put(getString(R.string.title), title);
         params.put(getString(R.string.description), description);
         //params.put(getString(R.string.urlStr), "");
         String res = "";
@@ -271,8 +307,9 @@ Can you give me few lines of code here, how it must looks like.
 
     @Override
     public void goToLoginActivity() {
-        L.l("goToLoginActivity()", this);
-        startActivity(new Intent(this, LoginActivity.class));
+        L.l("goToLoginActivity", this);
+        getSupportFragmentManager().popBackStackImmediate();
+        super.onBackPressed();
     }
 
     @Override
@@ -288,5 +325,9 @@ Can you give me few lines of code here, how it must looks like.
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static EmloyeeFragment getEmloyeeFragment() {
+        return emloyeeFragment;
     }
 }

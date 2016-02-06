@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutionException;
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MainActivity;
-import ua.kiev.netmaster.netmasterqualitycontrol.adapters.TaskAdapter;
+import ua.kiev.netmaster.netmasterqualitycontrol.adapters.HolderTaskAdapter;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
 
@@ -30,7 +30,7 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
     private Task task;
     private String result;
     private static  List<Task> taskList;
-    private TaskAdapter taskAdapter;
+    private HolderTaskAdapter taskAdapter;
     private TypeToken<List<Task>> tokenTask;
     private MyDownTask myDownTask;
     private ListView listView;
@@ -73,7 +73,7 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
         try {
             result = new MyDownTask("task/getAll", getActivity().getApplicationContext()).execute().get();
             taskList = LoginActivity.gson.fromJson(result, tokenTask.getType());
-            taskAdapter = new TaskAdapter(getActivity().getApplicationContext(), taskList);
+            taskAdapter = new HolderTaskAdapter(getActivity(), taskList);
             listView.setAdapter(taskAdapter);
             listView.setOnItemClickListener(this);
 
