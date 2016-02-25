@@ -51,6 +51,7 @@ import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
 import ua.kiev.netmaster.netmasterqualitycontrol.fragments.CreateRegisterDialog;
+import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -59,31 +60,27 @@ import static android.Manifest.permission.READ_CONTACTS;
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, CreateRegisterDialog.RegisterDialogCommunicator {
-
+public class LoginActivity extends Activity implements CreateRegisterDialog.RegisterDialogCommunicator {
     /**
      * Id to identity READ_CONTACTS permission request.
      */
-    private static final int REQUEST_READ_CONTACTS = 0;
-
+    private final int REQUEST_READ_CONTACTS = 0;
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private MyDownTask mAuthTask = null;
-
     // UI references.
     private AutoCompleteTextView loginView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
     private String result="", access, res;
-    private static String login, password;
-    public static Gson gson;
-    private static Employee employee;
+    private String login, password;
     public static final String LOG = "myLogs";
     private LoginButton loginButton;
-    private static Profile profile;
-    private FragmentManager manager;
+    private Profile profile;
+    private MyApplication myApplication;
+
 
     //FB
     private CallbackManager callbackManager;
@@ -91,13 +88,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
         @Override
         public void onSuccess(LoginResult loginResult) {
            // AccessToken accessToken = loginResult.getAccessToken();
-           profile = Profile.getCurrentProfile();
+           myApplication.setFbProfile(profile = Profile.getCurrentProfile());
             if(profile!=null){
-                Log.d(LoginActivity.LOG, "LoginActivity. FacebookCallback : onSuccess() " + profile.getFirstName() + " " + profile.getLastName());
-                while (!authenticate(profile.getFirstName(), profile.getFirstName() + profile.getId())) {
-                    registerDialogData(profile.getFirstName(), profile.getFirstName() + profile.getId());
-               }
-                goToMainActivity();
+                L.l("LoginActivity. FacebookCallback : onSuccess() " + profile.getFirstName() + " " + profile.getLastName());
+                loginWithFb();
             }
         }
 
@@ -112,19 +106,33 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
         }
     };
 
+    private void loginWithFb(){
+        while (!authenticate(profile.getFirstName(), profile.getFirstName() + profile.getId())) {
+            registerDialogData(profile.getFirstName(), profile.getFirstName() + profile.getId());
+        }
+        goToMainActivity();
+    }
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(LOG, "LoginActivity. onCreate()");
+        L.l("onCreate()", this);
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
+        myApplication = (MyApplication) getApplication();
         setContentView(R.layout.activity_login);
         // Set up the login form.
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
         callbackManager = CallbackManager.Factory.create();
        // mTokenTracker.startTracking();
        // mProfileTracker.startTracking();
-        gson = new Gson();
         initViews();
+        profile=Profile.getCurrentProfile();
+        if(profile!=null) {
+            L.l("onCreate() profile.toString() = " + profile.toString(), this);
+            loginWithFb();
+        }
     }
 
     @Override
@@ -144,14 +152,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
         loginButton = (LoginButton) findViewById(R.id.login_button);
         loginButton.setReadPermissions();
         loginView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
+        //populateAutoComplete();
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
                         attemptLogin();
-
                     return true;
                 }
                 return false;
@@ -162,7 +169,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
         mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    attemptLogin();
+                attemptLogin();
 
             }
         });
@@ -176,27 +183,30 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
     protected void onPostResume() {
         super.onPostResume();
         Log.d(LOG, "LoginActivity. onPostResume()");
-
+       /* if(profile!=null){
+            myApplication.setFbProfile(profile);
+            loginWithFb();
+        }*/
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         showProgress(false);
+        access = null;
         Log.d(LOG, "LoginActivity. onResume()");
     }
 
-    private void populateAutoComplete() {
+   /* private void populateAutoComplete() {
         Log.d(LOG, "LoginActivity. populateAutoComplete()");
         if (!mayRequestContacts()) {
             return;
         }
-
         getLoaderManager().initLoader(0, null, this);
-    }
+    }*/
 
     private boolean mayRequestContacts() {
-        Log.d(LOG,"LoginActivity. mayRequestContacts()");
+        Log.d(LOG, "LoginActivity. mayRequestContacts()");
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;
         }
@@ -221,7 +231,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
     /**
      * Callback received when a permissions request has been completed.
      */
-    @Override
+    /*@Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         Log.d(LOG,"LoginActivity. onRequestPermissionsResult()");
@@ -230,7 +240,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
                 populateAutoComplete();
             }
         }
-    }
+    }*/
 
 
     /**
@@ -248,7 +258,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
 
         // Store values at the time of the login attempt.// TODO: 22.12.2015
         login = loginView.getText().toString();
+            myApplication.setLogin(login);
         password = mPasswordView.getText().toString();
+            myApplication.setPassword(password);
 
         boolean cancel = false;
         View focusView = null;
@@ -259,14 +271,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
             focusView = mPasswordView;
             cancel = true;
         }
-
         // Check for a valid login address.
         if (TextUtils.isEmpty(login)) {
             loginView.setError(getString(R.string.error_field_required));
             focusView = loginView;
             cancel = true;
         }
-
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -285,11 +295,19 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
 
 
     private boolean authenticate(String login,String password){
-        Log.d(LOG,"LoginActivity. authenticate()");
+        Log.d(LOG, "LoginActivity. authenticate()");
         showProgress(true);
-        mAuthTask = new MyDownTask("authAndroid",login, password,this);
+        Map<String, String> params=new HashMap<>();
+        params.put(getString(R.string.login),login);
+        params.put(getString(R.string.password),password);
+        mAuthTask = new MyDownTask(params,this);
         try {
             result = mAuthTask.execute().get().trim();
+            if(result.equals(getString(R.string.server_unreachable))){
+                L.t(result,this);
+                L.l(result,this);
+                return false;
+            }
             Log.d(LOG,"LoginActivity. authenticate(). result= "+result);
         } catch (InterruptedException|ExecutionException e) {
             e.printStackTrace();
@@ -302,9 +320,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
             Log.d(LOG,"LoginActivity. authenticate(). access= "+access);
         }
         if (access!=null&&access.equals("Auth_Success")) {
-            employee = gson.fromJson(res, Employee.class);
-            Log.d(LOG, "employee: "+employee);
-            Log.d(LOG, "LoginActivity. trying start MainActivity");
+            L.l("access!=null&&access.equals(\"Auth_Success\")", this);
+            Employee me1 = myApplication.getGson().fromJson(res, Employee.class);
+            L.l("me1 = " + me1, this);
+            myApplication.setMe(myApplication.getGson().fromJson(res, Employee.class));
+            L.l("me: "+ myApplication.getMe());
+            L.l("LoginActivity. trying start MainActivity");
             return true;
         }else {
             return false;
@@ -317,7 +338,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
     }
 
     private boolean isPasswordValid(String password) {
-        Log.d(LOG,"LoginActivity. isPasswordValid()");
+        Log.d(LOG, "LoginActivity. isPasswordValid()");
         return password.length() > 4;
     }
 
@@ -326,7 +347,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
-        Log.d(LOG,"LoginActivity. showProgress()");
+        Log.d(LOG, "LoginActivity. showProgress()");
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -358,7 +379,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
         }
     }
 
-    @Override
+    /*@Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.d(LOG, "LoginActivity. onCreateLoader()");
         return new CursorLoader(this,
@@ -374,9 +395,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
                 // Show primary email addresses first. Note that there won't be
                 // a primary email address if the user hasn't specified one.
                 ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
+    }*/
 
-    @Override
+   /* @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.d(LOG,"LoginActivity. onLoadFinished()");
         List<String> emails = new ArrayList<>();
@@ -385,16 +406,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
             emails.add(cursor.getString(ProfileQuery.ADDRESS));
             cursor.moveToNext();
         }
-
         addEmailsToAutoComplete(emails);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         Log.d(LOG, "LoginActivity. onLoaderReset()");
-    }
+    }*/
 
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
+   /* private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         Log.d(LOG, "LoginActivity. addEmailsToAutoComplete()");
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
@@ -402,7 +422,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         loginView.setAdapter(adapter);
-    }
+    }*/
 
     @Override
     public void registerDialogData(String login, String password) {
@@ -413,14 +433,21 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
         try {
             String res = new MyDownTask(params,this).execute().get();
             Toast.makeText(this,"User created: " +res, Toast.LENGTH_LONG).show();
-            if(Long.parseLong(res)>0) goToMainActivity();
+            if (res.equals(getString(R.string.server_unreachable))){
+                L.t(res,this);
+            } else if(Long.parseLong(res)>0) attemptLogin();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    @Override
+    public void addEmplToMyNetwork(Long emplId) {
+        //not Implemented;
+    }
 
-    private interface ProfileQuery {
+
+    /*private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
                 ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
@@ -428,7 +455,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
 
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
-    }
+    }*/
 
     @Override
     protected void onPause() {
@@ -440,31 +467,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>, 
     protected void onDestroy() {
         super.onDestroy();
         Log.d(LOG, "LoginActivity. onDestroy()");
-    }
-
-   /* public void  nextActivity(View view){
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-    }*/
-
-    public static String getLogin() {
-        return login;
-    }
-
-    public static String getPassword() {
-        return password;
-    }
-
-    public static Profile getProfile() {
-        return profile;
-    }
-
-    public static Employee getEmployee() {
-        return employee;
-    }
-
-    public static void setEmployee(Employee employee) {
-        LoginActivity.employee = employee;
     }
 }
 

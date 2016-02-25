@@ -21,21 +21,21 @@ import java.util.concurrent.ExecutionException;
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MainActivity;
+import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
 import ua.kiev.netmaster.netmasterqualitycontrol.adapters.HolderTaskAdapter;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
 
 public class TaskFragment extends Fragment implements AdapterView.OnItemClickListener, View.OnClickListener {
 
+
+    private MyApplication myApplication;
     private Task task;
-    private String result;
-    private static  List<Task> taskList;
+    //private String result;
+    private List<Task> taskList;
     private HolderTaskAdapter taskAdapter;
-    private TypeToken<List<Task>> tokenTask;
-    private MyDownTask myDownTask;
+    //private TypeToken<List<Task>> tokenTask;
     private ListView listView;
-    private EditText[] editTexts;
-    private TextView[] textViews;
     private FloatingActionButton fab;
 
     public static final String TAG = "TaskFragmentTag";
@@ -65,21 +65,17 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
         super.onActivityCreated(savedInstanceState);
         Log.d(LoginActivity.LOG, "TaskFragment. onActivityCreated()");
        // MainActivity.commitFragment(new DetailsFragment(), getFragmentManager());
-        tokenTask =  new TypeToken<List<Task>>(){};
+        //tokenTask =  new TypeToken<List<Task>>(){};
+        myApplication = (MyApplication) getActivity().getApplication();
         listView = (ListView)getActivity().findViewById(R.id.taskListView);
         fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.setOnClickListener(this);
+        taskList = ((MyApplication)getActivity().getApplication()).updateTaskList();
+        taskAdapter = new HolderTaskAdapter(getActivity(), taskList);
+        listView.setAdapter(taskAdapter);
+        listView.setOnItemClickListener(this);
 
-        try {
-            result = new MyDownTask("task/getAll", getActivity().getApplicationContext()).execute().get();
-            taskList = LoginActivity.gson.fromJson(result, tokenTask.getType());
-            taskAdapter = new HolderTaskAdapter(getActivity(), taskList);
-            listView.setAdapter(taskAdapter);
-            listView.setOnItemClickListener(this);
 
-        } catch (InterruptedException| ExecutionException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -95,7 +91,7 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
     public void onResume() {
         super.onResume();
         Log.d(LoginActivity.LOG, "TaskFragment. onResume()");
-        MainActivity.setTask(null);
+        ((MyApplication)getActivity().getApplication()).setCurTask(null);
     }
 
 
@@ -133,7 +129,7 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         task = taskList.get(i);
         Log.d(LoginActivity.LOG,"TaskFragment. onItemClick(), task: "+task);
-        MainActivity.commitFragment(DetailsFragment.newInstance(task), getFragmentManager());
+        myApplication.commitFragment(DetailsFragment.newInstance(task), getFragmentManager());
     }
 
     @Override
@@ -142,7 +138,7 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
             new CreateTaskDialog().show(getFragmentManager(),"AddTaskDialog");
     }
 
-    public static List<Task> getTaskList() {
+    public List<Task> getTaskList() {
         return taskList;
     }
 }

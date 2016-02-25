@@ -14,10 +14,13 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.CookieHandler;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Map;
 
+import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
+import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 
 /**
@@ -27,8 +30,9 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
 
     private Gson gson;
     private Context context;
-    private String login, result, inputLine, gsonString, query, password, title, description, employee, task, taskId, emlpId, urlStr = "http://176.37.239.136:8082/";
-    private final String LOGIN="login", PASSWORD="password", GSONSTRING="gsonString", TITLE="title", DESCRIPTION="description", URLSTR="urlTail", EMPLOYEE="employee", TASK="task", EMPLID="emlpId", TASKID="taskId";
+    private String login, result, inputLine, gsonString, query, password, title, description, networkName, networkId, owners, networkgson, employee, task, taskId, emlpId, urlStr = "http://195.18.29.171:8082/";//"http://176.37.239.136:8082/";
+    private final String LOGIN="login", PASSWORD="password", GSONSTRING="gsonString", TITLE="title", DESCRIPTION="description",
+            URLTAIL ="urlTail", EMPLOYEE="employee", TASK="task", EMPLID="emlpId", TASKID="taskId", NETWORKNAME="networkname", NETWORKID="networkId", NETWORKGSON="networkgson", OWNERS="owners";
     private Map<String,String> params;
     private URL url;
     private HttpURLConnection con;
@@ -45,7 +49,6 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         this.password = password;
         this.context = context;
         gson = new Gson();
-
     }
 
     public MyDownTask(Map<String,String> params, Context context) {
@@ -60,8 +63,12 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         task = params.get(TASK);
         taskId = params.get(TASKID);
         emlpId = params.get(EMPLID);
-        if(params.get(URLSTR)==null)    choseUrlTail();
-         else urlStr+=params.get(URLSTR);
+        networkName = params.get(NETWORKNAME);
+        owners = params.get(OWNERS);
+        networkId = params.get(NETWORKID);
+        networkgson = params.get(NETWORKGSON);
+        if(params.get(URLTAIL)==null)    choseUrlTail();
+        else urlStr+=params.get(URLTAIL);
     }
 
     public MyDownTask(String urlStrTail, String gsonString, Context context) {
@@ -91,15 +98,21 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
 
     protected void onPostExecute(String result) {
        // if(!isReachable) Toast.makeText(context, "No Internet connection! Try later.", Toast.LENGTH_LONG).show(); // TODO: 15.12.2015
+        //if(result.equals(context.getString(R.string.server_unreachable))){
+        //    L.t(context.getString(R.string.server_unreachable),context);
+        //}
     }
 
     private void choseUrlTail(){
-        if(login!=null) urlStr+= "authAndroid";
+        if(login!=null) urlStr+="authAndroid";
         if(title!=null) urlStr+="task/addTask";
         if(employee!=null)urlStr+="employee/updateEmpl";
         if(task!=null) urlStr+="task/updateTask";
         if(taskId!=null) urlStr+="task/deleteTask";
         if(emlpId!=null) urlStr+="employee/deleteEmpl";
+        if(networkName!=null) urlStr+="network/create";
+        if(networkId!=null) urlStr+="network/delete";
+        if(networkgson!=null) urlStr+="network/update";
     }
 
     public String connect() {
@@ -166,6 +179,11 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         if(task!=null) builder.appendQueryParameter(TASK, task);
         if(taskId!=null) builder.appendQueryParameter(TASKID, taskId);
         if(emlpId!=null) builder.appendQueryParameter(EMPLID, emlpId);
+        if(networkName!=null) builder.appendQueryParameter(NETWORKNAME,networkName);
+        if(owners!=null) builder.appendQueryParameter(OWNERS, owners);
+        if(networkId!=null) builder.appendQueryParameter(NETWORKID, networkId);
+        if(networkgson!=null)builder.appendQueryParameter(NETWORKGSON, networkgson);
+        L.l("String query = "+query);
     }
 
     private String commonConnect() {
@@ -183,11 +201,11 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
             builder = new Uri.Builder();
             appendQueryParameters();
             query = builder.build().getEncodedQuery();
-            Log.d(LoginActivity.LOG, "connect(). String query = "+query);
+            Log.d(LoginActivity.LOG, "connect(). String query = " + query);
             os = con.getOutputStream();
             writer = new BufferedWriter(
                     new OutputStreamWriter(os, "UTF-8"));
-            writer.write(query);
+            if(query!=null)writer.write(query);
             writer.flush();
             writer.close();
             os.close();
@@ -196,6 +214,8 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
             while ((inputLine = in.readLine()) != null) {
                 responses.append(inputLine);
             }
+        }catch (SocketTimeoutException ste){
+            return context.getString(R.string.server_unreachable);
         }catch (Exception e){
             e.printStackTrace();
         } finally {

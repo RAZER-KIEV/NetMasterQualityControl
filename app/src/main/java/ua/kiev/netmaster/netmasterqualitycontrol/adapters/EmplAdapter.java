@@ -50,7 +50,7 @@ public class EmplAdapter extends BaseAdapter{
             view = lInflater.inflate(R.layout.item, viewGroup, false);
         }
         Employee empl = getEmpl(i);
-        Log.d(LoginActivity.LOG, "empl: "+empl);
+        //Log.d(LoginActivity.LOG, "empl: "+empl);
 
         String[] datetine = empl.getLastOnline().toString().split(" ");
 

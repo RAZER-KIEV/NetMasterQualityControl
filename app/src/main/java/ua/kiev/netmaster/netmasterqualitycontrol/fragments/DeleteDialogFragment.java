@@ -16,11 +16,14 @@ import android.widget.TextView;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MainActivity;
+import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class DeleteDialogFragment extends DialogFragment implements View.OnClickListener {
+
+    private MyApplication myApplication;
     private Button deleteDtn, cancel;
     private EditText loginEt, passwordEt;
     private DeleteDialogFragComunicator deleteDialogFragComunicator;
@@ -35,6 +38,7 @@ public class DeleteDialogFragment extends DialogFragment implements View.OnClick
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         deleteDialogFragComunicator = (DeleteDialogFragComunicator) activity;
+        myApplication = (MyApplication) activity.getApplication();
     }
 
     @NonNull
@@ -67,7 +71,7 @@ public class DeleteDialogFragment extends DialogFragment implements View.OnClick
     public void onClick(View view) {
         if(view.getId()==R.id.create_dialog){
             deleteDialogFragComunicator.delete(view);
-            MainActivity.commitFragment( new EmloyeeFragment(), getFragmentManager());
+            myApplication.commitFragment(new EmloyeeFragment(), getFragmentManager());
             dismiss();
         }else {
             dismiss();

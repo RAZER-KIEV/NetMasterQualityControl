@@ -3,6 +3,8 @@ package ua.kiev.netmaster.netmasterqualitycontrol.domain;
 import java.util.Arrays;
 import java.util.Date;
 
+import ua.kiev.netmaster.netmasterqualitycontrol.enums.EmplPossition;
+
 /**
  * Created by ПК on 11.12.2015.
  */
@@ -12,7 +14,8 @@ import java.util.Date;
 public class Employee {
 
     private Long id;
-    private String position;            // "admin", "tech", "superAdmin"
+    private Long networkId;
+    private EmplPossition position;            // "admin", "tech", "superAdmin"
     private String login;
     private String password;
     private String inn;
@@ -30,15 +33,9 @@ public class Employee {
     public Employee() {
     }
 
-    public Employee(String login, String password) {
-        this.login = login;
-        this.password = password;
-        isBlocked = false;
-        isBusy = false;
-    }
-
-    public Employee(Long id, String position, String login, String password, String inn, String phone, String home, Date regdate, Integer wrongPass, Integer bonusSumm, Boolean isBlocked, Boolean isBusy, Double lastLat, Double lastLong, Date lastOnline) {
+    public Employee(Long id, Long networkId, EmplPossition position, String login, String password, String inn, String phone, String home, Date regdate, Integer wrongPass, Integer bonusSumm, Boolean isBlocked, Boolean isBusy, Double lastLat, Double lastLong, Date lastOnline) {
         this.id = id;
+        this.networkId = networkId;
         this.position = position;
         this.login = login;
         this.password = password;
@@ -63,11 +60,11 @@ public class Employee {
         this.id = id;
     }
 
-    public String getPosition() {
+    public EmplPossition getPosition() {
         return position;
     }
 
-    public void setPosition(String position) {
+    public void setPosition(EmplPossition position) {
         this.position = position;
     }
 
@@ -175,10 +172,19 @@ public class Employee {
         this.lastOnline = lastOnline;
     }
 
+    public Long getNetworkId() {
+        return networkId;
+    }
+
+    public void setNetworkId(Long networkId) {
+        this.networkId = networkId;
+    }
+
     @Override
     public String toString() {
         return "Employee{" +
                 "id=" + id +
+                ", networkId=" + networkId +
                 ", position='" + position + '\'' +
                 ", login='" + login + '\'' +
                 ", password='" + password + '\'' +

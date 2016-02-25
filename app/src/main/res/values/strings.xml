@@ -25,9 +25,9 @@
     <string name="title_activity_maps">Map</string>
 
     <!-- MyDowmTask param names -->
+    <string name="me">me</string>
     <string name="title">title</string>
     <string name="login">login</string>
-    <string name="employee">employee</string>
     <string name="description">description</string>
     <string name="gsonStr">gsonStr</string>
     <string name="password">password</string>
@@ -35,6 +35,8 @@
     <string name="task">task</string>
     <string name="emlpId">emlpId</string>
     <string name="taskId">taskId</string>
+    <string name="networkname">networkname</string>
+    <string name="owners">owners</string>
     <string name="urlStrValue">http://176.37.239.136:8082/</string>
 
     <!-- Url Tails-->
@@ -57,8 +59,23 @@
     <string name="register_dialog_title">No such user found. Register new ?</string>
     <string name="delete_Employee">Delete Employee?</string>
     <string name="delete">delete</string>
-    <string name="logout">Do you wish to Logout?</string>
-    <string name="exit">Exit</string>
+    <string name="do_logout">Do you wish to Logout?</string>
+    <string name="logout">Log Out</string>
     <string name="create_new_empl">Create new Employee?</string>
+    <string name="createNetwork">Create Network?</string>
+    <string name="networkid">networkid</string>
+    <string name="networkgson">networkgson</string>
+    <string name="employee">employee</string>
+    <string name="employee_getAll">employee/getAll</string>
+    <string name="task_getAll">task/getAll</string>
+    <string name="network_getAll">network/getAll</string>
+    <string name="detailsFragment">DetailsFragment</string>
+    <string name="no_permissions">You haven\'t permissions!</string>
+    <string name="employee_getEmpl">employee/getEmpl</string>
+    <string name="event_getAllbyNetwork">event/getAllbyNetwork</string>
+    <string name="server_unreachable">Server Unreachable</string>
+    <string name="network_addEmployeeToMyNetwork">network/addEmployeeToMyNetwork</string>
+    <string name="id">id</string>
+    <string name="event_getLastNews">event/getLastNews</string>
 
 </resources>

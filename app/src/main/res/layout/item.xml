@@ -2,9 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="1dp"
+    android:layout_margin="@dimen/item_margin"
     android:background="@drawable/items_shape_rounded"
-    android:padding="5dp"
+    android:padding="@dimen/item_padding"
     >
 
     <TableRow

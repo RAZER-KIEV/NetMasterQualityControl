@@ -27,7 +27,8 @@ import ua.kiev.netmaster.netmasterqualitycontrol.fragments.TaskFragment;
 import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-    
+
+    private MyApplication myApplication;
     private List<Task> taskList;
     private List<Employee> employeeList;
     
@@ -43,14 +44,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        
-        taskList= TaskFragment.getTaskList();
-        updeteEmplList();
+        myApplication = (MyApplication) getApplication();
+        taskList= myApplication.getTaskList();
+        updateEmplList();
     }
 
-    private void updeteEmplList(){
+    private void updateEmplList(){
         L.l("updeteEmplList()",this);
-       employeeList = MainActivity.getEmloyeeFragment().updateEmplList();
+       employeeList = myApplication.updateEmplList();
     }
 
     /**
@@ -80,8 +81,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 LatLng curLatLong = new LatLng(employee.getLastLat(),employee.getLastLong());
                 //String title = ""+employee.getLogin()+"\n"+employee.getLastOnline().toString();
                 //L.l("title= " +title,this);
-                DateFormat format = new SimpleDateFormat("yyyy-mm-dd hh:mm", Locale.ENGLISH);
-                format.format(employee.getLastOnline());
+                DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm", Locale.ENGLISH);
                 mMap.addMarker(new MarkerOptions().position(curLatLong).title(employee.getLogin()+"    "+format.format(employee.getLastOnline())));
 
             }catch (Exception e){

@@ -3,7 +3,7 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/items_shape_rounded"
-    android:padding="5dp">
+    android:padding="@dimen/item_padding">
 
     <TextView
         android:layout_width="@dimen/abc_action_bar_stacked_tab_max_width"

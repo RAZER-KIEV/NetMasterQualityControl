@@ -3,6 +3,10 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_networks"
+            android:icon="@drawable/ic_lan"
+            android:title="Networks" />
+        <item
             android:id="@+id/nav_tasks"
             android:icon="@drawable/ic_message_alert"
             android:title="Tasks" />
@@ -11,13 +15,18 @@
             android:icon="@drawable/ic_account_multiple"
             android:title="Employees" />
         <item
+            android:id="@+id/nav_events"
+            android:icon="@drawable/ic_checkbox_multiple_marked"
+            android:title="Events" />
+        <item
             android:id="@+id/nav_map"
             android:icon="@drawable/ic_map_marker_multiple"
             android:title="Map" />
         <item
             android:id="@+id/nav_service"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_crosshairs_gps"
             android:title="Start/Stop service" />
+
     </group>
 
     <item android:title="My profile">
@@ -28,7 +37,7 @@
                 android:title="Manage My Profile" />
             <item
                 android:id="@+id/nav_logOut"
-                android:icon="@drawable/ic_menu_send"
+                android:icon="@drawable/ic_logout"
                 android:title="Log Out" />
         </menu>
     </item>

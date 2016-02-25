@@ -38,7 +38,7 @@ public class LogoutDialog extends DialogFragment implements View.OnClickListener
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.addtask_dialog, null);
         ExitBtn = (Button)view.findViewById(R.id.create_dialog);
-        ExitBtn.setText(R.string.exit);
+        ExitBtn.setText(R.string.logout);
         cancel = (Button)view.findViewById(R.id.cancel_dialog);
         ExitBtn.setOnClickListener(this);
         cancel.setOnClickListener(this);
@@ -51,7 +51,7 @@ public class LogoutDialog extends DialogFragment implements View.OnClickListener
         passwordTv = (TextView) view.findViewById(R.id.descriptionTv);
         passwordTv.setVisibility(View.GONE);
         dialogTitleTv = (TextView) view.findViewById(R.id.dialogTitleTv);
-        dialogTitleTv.setText(R.string.logout);
+        dialogTitleTv.setText(R.string.do_logout);
         AlertDialog.Builder builder  = new AlertDialog.Builder(getActivity());
         builder.setView(view);
         return builder.create();

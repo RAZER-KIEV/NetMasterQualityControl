@@ -75,7 +75,7 @@ public class PointGPS {
                 ", title='" + title + '\'' +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
-                ", date=" + localDateTime +
+                ", publishDate=" + localDateTime +
                 '}';
     }
 }

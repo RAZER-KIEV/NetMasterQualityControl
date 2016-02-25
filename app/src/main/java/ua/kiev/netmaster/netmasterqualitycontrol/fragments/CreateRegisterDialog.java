@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
+import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
 import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 /**
@@ -27,6 +28,7 @@ public class CreateRegisterDialog extends DialogFragment implements View.OnClick
     private static String title;
     private TextView loginTv, passwordTv, dialogTitleTv;
     private View view;
+    private MyApplication myApplication;
 
     public CreateRegisterDialog() {
     }
@@ -54,23 +56,27 @@ public class CreateRegisterDialog extends DialogFragment implements View.OnClick
         registerBt.setOnClickListener(this);
         cancel.setOnClickListener(this);
         loginEt = (EditText)view.findViewById(R.id.etTitle);
-        loginEt.setText(LoginActivity.getLogin());
+        loginEt.setText(myApplication.getLogin());//LoginActivity.getLogin());
         passwordEt = (EditText) view.findViewById(R.id.etDescription);
-        passwordEt.setText(LoginActivity.getPassword());
+        passwordEt.setText(myApplication.getPassword());
         loginTv = (TextView) view.findViewById(R.id.titleTv);
-        loginTv.setText(R.string.login);
         passwordTv = (TextView) view.findViewById(R.id.descriptionTv);
         passwordTv.setText(R.string.password);
         dialogTitleTv = (TextView) view.findViewById(R.id.dialogTitleTv);
-        dialogTitleTv.setText(R.string.register_dialog_title);
+
         if(title!=null)
             setTitle(title);
+        else {
+            dialogTitleTv.setText(R.string.register_dialog_title);
+            loginTv.setText(R.string.login);
+        }
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         registerDialogCommunicator = (RegisterDialogCommunicator) activity;
+        myApplication = (MyApplication) activity.getApplication();
         initViews();
     }
 
@@ -88,8 +94,11 @@ public class CreateRegisterDialog extends DialogFragment implements View.OnClick
         if(view.getId()==R.id.create_dialog){
             loginStr = loginEt.getText().toString();
             passwordStr = passwordEt.getText().toString();
-            registerDialogCommunicator.registerDialogData(loginStr, passwordStr);
-            //addTaskDialogCommunicator.onAddTaskDialogData(loginStr, passwordStr);
+            if(passwordStr.length()>0) {
+                registerDialogCommunicator.registerDialogData(loginStr, passwordStr);
+                //addTaskDialogCommunicator.onAddTaskDialogData(loginStr, passwordStr);
+            }else
+                registerDialogCommunicator.addEmplToMyNetwork(Long.valueOf(loginStr));
             dismiss();
         }else {
             dismiss();
@@ -99,11 +108,14 @@ public class CreateRegisterDialog extends DialogFragment implements View.OnClick
     public interface  RegisterDialogCommunicator
     {
         void registerDialogData(String login, String password);
+        void addEmplToMyNetwork(Long emplId);
     }
 
     public void setTitle(String title){
         dialogTitleTv.setText(title);
         loginEt.setText("");
         passwordEt.setText("");
+        passwordEt.setHint("only if new");
+        loginTv.setText("login or ID");
     }
 }

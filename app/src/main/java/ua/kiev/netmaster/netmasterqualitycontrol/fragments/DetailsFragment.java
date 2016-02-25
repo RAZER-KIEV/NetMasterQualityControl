@@ -28,17 +28,25 @@ import java.util.concurrent.ExecutionException;
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MainActivity;
+import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
+import ua.kiev.netmaster.netmasterqualitycontrol.domain.Network;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
+import ua.kiev.netmaster.netmasterqualitycontrol.enums.DeteilsMode;
 import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
-
+import ua.kiev.netmaster.netmasterqualitycontrol.sequrity.MySecurity;
 
 
 public class DetailsFragment extends Fragment implements View.OnClickListener {
 
+
+    private MyApplication myApplication;
     private static Employee employee;
     private static Task task;
+    private static Network network;
+    private static DeteilsMode mode;
+
     private final String saveBtnTag="saveBtnTag", deleteBtnTag="deleteBtnTag", acceptBtnTag="acceptBtnTag", contactBtnTag="contactBtnTag";
     private String response;
     private EditText[] editTexts = new EditText[13];
@@ -47,9 +55,11 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     private FloatingActionMenu faMenu;
     private Employee changedEmployee;
     private Task changedTask;
-    private Gson gson;
+    private Network changedNetwork;
+    //private Gson gson;
     private Map<String,String> params;
-    private static boolean isTaskMode;
+
+    //private static boolean isTaskMode;
 
 
     public DetailsFragment() {}
@@ -63,7 +73,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         if(task!=null){
             args.putString("arg", "task");
             DetailsFragment.task  = task;
-            isTaskMode=true;
+            mode = DeteilsMode.TaskMode;
         }
         f.setArguments(args);
         return f;
@@ -77,7 +87,20 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         if (employee!=null){
             args.putString("arg", "employee");   //getArguments().getInt("arg", null);
             DetailsFragment.employee = employee;
-            isTaskMode=false;
+            mode=DeteilsMode.EmployeeMode;
+        }
+        f.setArguments(args);
+        return f;
+    }
+
+    public static DetailsFragment newInstance(Network network){
+        L.l("DetailsFragment.newInstance(Employee employee)");
+        DetailsFragment f = new DetailsFragment();
+        Bundle args = new Bundle();
+        if (network!=null){
+            args.putString("arg", "network");   //getArguments().getInt("arg", null);
+            DetailsFragment.network = network;
+            mode = DeteilsMode.NetworkMode;
         }
         f.setArguments(args);
         return f;
@@ -87,13 +110,10 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
        return getArguments().getString("arg");
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.gson=LoginActivity.gson;
         params = new HashMap<>();
-
     }
 
 
@@ -114,6 +134,9 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         super.onActivityCreated(savedInstanceState);
         myFindViewById();
         initMyFab();
+        myApplication = (MyApplication)getActivity().getApplication();
+        //gson=myApplication.getGson();
+
     }
 
     @Override
@@ -121,16 +144,17 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         super.onStart();
         if(getArg().equals("task")){
             initTaskViews();
-        }
-        else if(getArg().equals("employee")){
+        }else if(getArg().equals("employee")){
             initEmplViews();
+        }else  if(getArg().equals("network")){
+            initNetworkViews();
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        L.l("onDetach ", this );
+        L.l("onDetach ", this);
     }
 
     @Override
@@ -138,61 +162,111 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         super.onPause();
     }
 
-    private Task compileChengedTask(){
-        String[] exec = editTexts[0].getText().toString().split(",");
-        Long[] executors = new Long[exec.length];
-        for(int i=0; i<exec.length; i++){
-            if((exec[i]!=null)&!(exec[i].equals("null"))) executors[i]=Long.parseLong(exec[i].trim()); else executors[i]=0l;
-        }
-        changedTask = new Task(task.getTaskId(), executors, editTexts[1].getText().toString(), editTexts[2].getText().toString(),
+    private Task compileChangedTask(){
+        changedTask = new Task(task.getTaskId(), task.getNetworkId(), fromStringToLongArr(editTexts[0].getText().toString()), editTexts[1].getText().toString(), editTexts[2].getText().toString(),
                 editTexts[3].getText().toString(),task.getLatitude(), task.getLongitude(), task.getPublished(), task.getAccepted(), task.getDone(),
-                editTexts[7].getText().toString(),editTexts[8].getText().toString());
+                task.getStatus(),task.getPriority());
         Log.d(LoginActivity.LOG, "DetailsFragment. change Task" + changedTask.toString());
         return changedTask;
     }
 
-    private void compileChengedEmpl(){
-        changedEmployee = new Employee(employee.getId(),editTexts[2].getText().toString(),editTexts[0].getText().toString(),editTexts[1].getText().toString(), editTexts[3].getText().toString(),
-                editTexts[4].getText().toString(), editTexts[5].getText().toString(), employee.getRegdate(), Integer.valueOf(editTexts[7].getText().toString()),
-                Integer.valueOf(editTexts[8].getText().toString()), Boolean.valueOf(editTexts[9].getText().toString()), Boolean.valueOf(editTexts[6].getText().toString()),
+    private Employee compileChangedEmpl(){
+       /* changedEmployee = new Employee();
+        changedEmployee.setId(employee.getId());
+        changedEmployee.setNetworkId(employee.getNetworkId());
+        changedEmployee.setPosition(employee.getPosition());
+        changedEmployee.setRegdate(employee.getRegdate());
+        changedEmployee.setLastLat(employee.getLastLat());
+        changedEmployee.setLastLong(employee.getLastLong());
+        changedEmployee.setLastOnline(employee.getLastOnline());
+        //changedEmployee.setLogin();*/
+
+
+        changedEmployee = new Employee(employee.getId(), employee.getNetworkId(), employee.getPosition(), editTexts[1].getText().toString(),editTexts[2].getText().toString(), editTexts[4].getText().toString(),
+                editTexts[5].getText().toString(), editTexts[6].getText().toString(), employee.getRegdate(), Integer.valueOf(editTexts[8].getText().toString()),
+                Integer.valueOf(editTexts[9].getText().toString()), Boolean.valueOf(editTexts[10].getText().toString()), Boolean.valueOf(editTexts[6].getText().toString()),
                 employee.getLastLat(),employee.getLastLong(), employee.getLastOnline());
         Log.d(LoginActivity.LOG, "DetailsFragment. change Empl" + changedEmployee.toString());
+        return changedEmployee;
+    }
+
+    private Network compileChangedNetwork(){
+       changedNetwork = new Network(network.getNetworkId(), editTexts[0].getText().toString(),fromStringToLongArr(editTexts[1].getText().toString()), fromStringToLongArr(editTexts[2].getText().toString()),
+               fromStringToLongArr(editTexts[3].getText().toString()), fromStringToLongArr(editTexts[4].getText().toString()), editTexts[5].getText().toString());
+        L.l("changedNetwork = " + changedNetwork, this);
+        return changedNetwork;
+    }
+
+    private Long[] fromStringToLongArr(String string){
+        String[] strArr = string.split(",");
+        Long[] longArr = new Long[strArr.length];
+        for(int i=0; i<strArr.length; i++){
+            if((strArr[i]!=null)&!(strArr[i].equals("null"))) longArr[i]=Long.parseLong(strArr[i].trim()); else longArr[i]=0l;
+        }
+        return longArr;
     }
 
     private void taskOnClickSave(){
+        if(MySecurity.hasPermissionsToModify(changedTask,myApplication)){
         Log.d(LoginActivity.LOG, "DetailsFragment. taskOnClick()");
-        String gString = gson.toJson(compileChengedTask());
+        String gString = myApplication.getGson().toJson(compileChangedTask());
         Log.d(LoginActivity.LOG, "DetailsFragment. gString: " + gString);
         params.put(getString(R.string.task), gString);
         sendRequest(params);
+        } else toastNoPermissins();
+    }
+
+    private void networkOnClickSave(){
+        if(MySecurity.hasPermissionsToModify(compileChangedNetwork(), myApplication)){
+        String gString = myApplication.getGson().toJson(compileChangedNetwork());
+        L.l("networkOnClickSave. gString = "+gString, this);
+        params.put(getString(R.string.networkgson), gString);
+        sendRequest(params);
+        } else toastNoPermissins();
     }
 
     private void taskOnClicAcceptParams(){
-        L.l("taskOnClicAcceptParams", this);
-        if(changedTask.getAccepted()==null) { changedTask.setAccepted(new Date()); }
-        else if(changedTask.getDone()==null) changedTask.setDone(new Date());
-        String gString = gson.toJson(changedTask);
-        params.put(getString(R.string.task),gString);
-        sendRequest(params);
+        if(MySecurity.hasPermissionsToAccept(changedTask, myApplication)) {
+            L.l("taskOnClicAcceptParams", this);
+            if (changedTask.getAccepted() == null) {
+                changedTask.setAccepted(new Date());
+            } else if (changedTask.getDone() == null) changedTask.setDone(new Date());
+            String gString = myApplication.getGson().toJson(changedTask);
+            params.put(getString(R.string.task), gString);
+            sendRequest(params);
+        }else toastNoPermissins();
     }
 
     private void taskOnClickDeleteParams(){
+        if(MySecurity.hasPermissionsToModify(changedTask, myApplication)){
         L.l("taskOnClickDeleteParams", this);
         params.put(getString(R.string.taskId), changedTask.getTaskId().toString());
         sendRequest(params);
+        }else toastNoPermissins();
+    }
+
+    private void networkOnClickDeleteParams(){
+        if(MySecurity.hasPermissionsToModify(changedNetwork,myApplication)){
+        params.put(getString(R.string.networkid),changedNetwork.getNetworkId().toString());
+        sendRequest(params);
+        }else toastNoPermissins();
     }
     private void emplOnClickSaveParams(){
+        if(MySecurity.hasPermissionsToModify(changedEmployee, myApplication)){
         Log.d(LoginActivity.LOG, "DetailsFragment. emplOnClickSaveParams()");
-        String gString = gson.toJson(changedEmployee);
+        String gString = myApplication.getGson().toJson(changedEmployee);
         Log.d(LoginActivity.LOG, "DetailsFragment. gString: " + gString);
         params.put(getString(R.string.employee), gString);
         sendRequest(params);
+        }else toastNoPermissins();
     }
 
     public void emplOnClickDeleteParams(){
+        if(MySecurity.hasPermissionsToModify(changedEmployee, myApplication)){
         L.l("emplOnClickAcceptParams()", this);
         params.put(getString(R.string.emlpId), changedEmployee.getId().toString());
         sendRequest(params);
+        }else toastNoPermissins();
     }
 
     private String sendRequest(Map<String, String> params){
@@ -215,9 +289,9 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         params.clear();
-        if(!isTaskMode){
+        if(mode==DeteilsMode.EmployeeMode){
             L.l("DetailsFragment. onClick() !isTaskMode");
-            compileChengedEmpl();
+            compileChangedEmpl();
             switch (view.getTag().toString()){
                 case  "deleteBtnTag" :
                     new DeleteDialogFragment().show(getFragmentManager(), "deleteEmplTag");
@@ -233,14 +307,14 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
                     break;
             }
         }
-        if(isTaskMode){
-            compileChengedTask();
+        if(mode==DeteilsMode.TaskMode){
+            compileChangedTask();
             L.l("onClick. isTaskMode");
             switch (view.getTag().toString()){
                 case  "deleteBtnTag" :
                     taskOnClickDeleteParams();
                     L.t("DELETED", getActivity());
-                    MainActivity.commitFragment(new TaskFragment(),getFragmentManager());
+                    myApplication.commitFragment(new TaskFragment(),getFragmentManager());
                     break;
                 case "saveBtnTag" :
                     taskOnClickSave();
@@ -249,7 +323,21 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
                 case  "acceptBtnTag" :
                     taskOnClicAcceptParams();
                     L.t("accepted " + response, getActivity()); // TODO: 29.12.2015 migrate data setting to server!
-                    MainActivity.commitFragment( new TaskFragment(), getFragmentManager());
+                    myApplication.commitFragment( new TaskFragment(), getFragmentManager());
+                    break;
+            }
+        }if(mode ==DeteilsMode.NetworkMode){
+            compileChangedNetwork();
+            switch (view.getTag().toString()){
+                case  "deleteBtnTag" :
+                    //taskOnClickDeleteParams();
+                    networkOnClickDeleteParams();
+                    L.t("DELETED", getActivity());
+                    myApplication.commitFragment(new NetworkFragment(), getFragmentManager());
+                    break;
+                case "saveBtnTag" :
+                    networkOnClickSave();
+                    L.t( response, getActivity());
                     break;
             }
         }
@@ -257,7 +345,7 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
 
     private void callEmpl(){
         Intent intent =new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse("tel:"+employee.getPhone()));
+        intent.setData(Uri.parse("tel:" + employee.getPhone()));
         startActivity(intent);
     }
 
@@ -323,14 +411,14 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         SubActionButton contactBtn = itemBuilder.setContentView(contactImg).build();
         contactBtn.setOnClickListener(this);
         contactBtn.setTag(contactBtnTag);
-        L.l("initMyFab(). isTaskMode=" + isTaskMode, this);
+        L.l("initMyFab(). isTaskMode=" + mode, this);
         FloatingActionMenu.Builder builder = new FloatingActionMenu.Builder(getActivity())
                 .addSubActionView(deleteBtn)
                 .addSubActionView(saveBtn);
-        if(!isTaskMode){
+        if(mode==DeteilsMode.EmployeeMode){
             L.l("contactBtn added", this);
             builder.addSubActionView(contactBtn);
-        }else {
+        }else if(mode==DeteilsMode.TaskMode) {
             L.l("acceptBtn added", this);
             builder.addSubActionView(acceptBtn);
         }
@@ -367,8 +455,8 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         if(task.getDone()!=null){
                  editTexts[6].setText(("" + task.getDone()).toString().substring(0, 20).trim());
         }else    editTexts[6].setText(""+task.getDone());
-        editTexts[7].setText(task.getStatus());
-        editTexts[8].setText(task.getPriority());
+        editTexts[7].setText(task.getStatus().toString());
+        editTexts[8].setText(task.getPriority().toString());
 
         for(int i=0; i<11; i++){
             textViews[i].setVisibility(View.VISIBLE);
@@ -381,31 +469,38 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         L.l("initEmplViews()", this);
         textViews[0].setText("ID");
         textViews[1].setText(employee.getId().toString());
-        textViews[2].setText("Login");
-        textViews[3].setText("Password");
-        textViews[4].setText("Position");
-        textViews[5].setText("INN");
-        textViews[6].setText("Phone");
-        textViews[7].setText("Home");
-        textViews[8].setText("Is Busy");
-        textViews[9].setText("WrongPass");
-        textViews[10].setText("BonusSumm");
-        textViews[11].setText("isBlocked");
-        textViews[12].setText("Reg. date");
-        textViews[13].setText("last Online");
+        textViews[2].setText("Network");
+        textViews[3].setText("Login");
+        textViews[4].setText("Password");
+        textViews[5].setText("Position");
+        textViews[6].setText("INN");
+        textViews[7].setText("Phone");
+        textViews[8].setText("Home");
+        textViews[9].setText("Is Busy");
+        textViews[10].setText("WrongPass");
+        textViews[11].setText("BonusSumm");
+        textViews[12].setText("isBlocked");
+        textViews[13].setText("Reg. date");
+        textViews[14].setText("last Online");
 
-        editTexts[0].setText(employee.getLogin());
-        editTexts[1].setText(employee.getPassword()); editTexts[1].setTransformationMethod(PasswordTransformationMethod.getInstance()); // TODO: 26.12.2015
-        editTexts[2].setText(employee.getPosition());
-        editTexts[3].setText(employee.getInn());
-        editTexts[4].setText(employee.getPhone());
-        editTexts[5].setText(employee.getHome());
-        editTexts[6].setText(employee.getIsBusy().toString());
-        editTexts[7].setText(employee.getWrongPass().toString());
-        editTexts[8].setText(employee.getBonusSumm().toString());
-        editTexts[9].setText(employee.getIsBlocked().toString());
-        editTexts[10].setText("" + employee.getRegdate().toString().substring(0, 20).trim());
-        editTexts[11].setText("" + employee.getLastOnline().toString().substring(0, 20).trim());
+
+        String networkName="";
+        for(Network network: myApplication.getNetworkList()){
+            if(network.getNetworkId()==employee.getNetworkId())networkName = network.getName();
+        }
+        editTexts[0].setText(networkName);
+        editTexts[1].setText(employee.getLogin());
+        editTexts[2].setText(employee.getPassword()); editTexts[2].setTransformationMethod(PasswordTransformationMethod.getInstance()); // TODO: 26.12.2015
+        editTexts[3].setText(employee.getPosition().toString());
+        editTexts[4].setText(employee.getInn());
+        editTexts[5].setText(employee.getPhone());
+        editTexts[6].setText(employee.getHome());
+        editTexts[7].setText(employee.getIsBusy().toString());
+        editTexts[8].setText(employee.getWrongPass().toString());
+        editTexts[9].setText(employee.getBonusSumm().toString());
+        editTexts[10].setText(employee.getIsBlocked().toString());
+        editTexts[11].setText("" + employee.getRegdate().toString().substring(0, 20).trim());
+        editTexts[12].setText("" + employee.getLastOnline().toString().substring(0, 20).trim());
 
         for (int i = 0; i < 14; i++) {
             textViews[i].setVisibility(View.VISIBLE);
@@ -415,15 +510,40 @@ public class DetailsFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    private void initNetworkViews(){
+        L.l("initNetworkViews()", this);
+        textViews[0].setText("ID");
+        textViews[1].setText(network.getNetworkId().toString());
+        textViews[2].setText("Name");
+        textViews[3].setText("Owners");
+        textViews[4].setText("Employees");
+        textViews[5].setText("Tasks");
+        textViews[6].setText("Partners");
+        textViews[7].setText("Contacts");
+        //editTexts[0].setText(Arrays.toString(task.getExecuterIds()).replaceAll("]", "").replace("[", ""));
+        editTexts[0].setText(network.getName());
+        editTexts[1].setText(Arrays.toString(network.getOwners()).replaceAll("]","").replace("[", ""));
+        editTexts[2].setText(Arrays.toString(network.getEmployees()).replaceAll("]","").replace("[",""));
+        editTexts[3].setText(Arrays.toString(network.getTasks()).replaceAll("]", "").replace("[", ""));
+        editTexts[4].setText(Arrays.toString(network.getFriendlyNetworks()).replaceAll("]", "").replace("[", ""));
+        editTexts[5].setText(network.getContacts());
+
+        for (int i = 0; i < 7; i++) {
+            textViews[i].setVisibility(View.VISIBLE);
+        }
+        for (int i = 0; i < 5; i++) {
+            editTexts[i].setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    private void toastNoPermissins(){
+        L.t(myApplication.getString(R.string.no_permissions),getActivity());
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         L.l("onDestroy", this);
-    }
-
-
-
-    public interface DetailsCommunicator{
-        void delete(View v);
     }
 }
