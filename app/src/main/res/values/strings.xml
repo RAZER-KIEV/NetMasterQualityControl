@@ -29,6 +29,7 @@
     <string name="title">title</string>
     <string name="login">login</string>
     <string name="description">description</string>
+    <string name="Description">Description</string>
     <string name="gsonStr">gsonStr</string>
     <string name="password">password</string>
     <string name="urlTail">urlTail</string>
@@ -77,5 +78,24 @@
     <string name="network_addEmployeeToMyNetwork">network/addEmployeeToMyNetwork</string>
     <string name="id">id</string>
     <string name="event_getLastNews">event/getLastNews</string>
+    <string name="task_id">Task ID</string>
+    <string name="task_type">Task type</string>
+    <string name="executors">Executors</string>
+    <string name="deription">Description</string>
+    <string name="address">Address</string>
+    <string name="published">Published</string>
+    <string name="accepted">Accepted</string>
+    <string name="done">Done</string>
+    <string name="status">Status</string>
+    <string name="priority">Priority</string>
+    <string name="saveBtnTag">saveBtnTag</string>
+    <string name="deleteBtnTag">deleteBtnTag</string>
+    <string name="acceptBtnTag">acceptBtnTag</string>
+    <string name="contactBtnTag">contactBtnTag</string>
+    <string name="type">Type</string>
+    <string name="Password">Password</string>
+    <string name="TaskDetailsFragment">TaskDetailsFragment</string>
+    <string name="EmplDetailsFragment">EmplDetailsFragment</string>
+    <string name="employees">Employees</string>
 
 </resources>

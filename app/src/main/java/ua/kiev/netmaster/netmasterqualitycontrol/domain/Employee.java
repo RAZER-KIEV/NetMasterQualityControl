@@ -29,11 +29,12 @@ public class Employee {
     private Double lastLat;
     private Double lastLong;
     private Date lastOnline;
+    private Long currentTaskId;
 
     public Employee() {
     }
 
-    public Employee(Long id, Long networkId, EmplPossition position, String login, String password, String inn, String phone, String home, Date regdate, Integer wrongPass, Integer bonusSumm, Boolean isBlocked, Boolean isBusy, Double lastLat, Double lastLong, Date lastOnline) {
+    public Employee(Long id, Long networkId, EmplPossition position, String login, String password, String inn, String phone, String home, Date regdate, Integer wrongPass, Integer bonusSumm, Boolean isBlocked, Boolean isBusy, Double lastLat, Double lastLong, Date lastOnline, Long currentTaskId) {
         this.id = id;
         this.networkId = networkId;
         this.position = position;
@@ -50,6 +51,15 @@ public class Employee {
         this.lastLat = lastLat;
         this.lastLong = lastLong;
         this.lastOnline = lastOnline;
+        this.currentTaskId = currentTaskId;
+    }
+
+    public Long getCurrentTaskId() {
+        return currentTaskId;
+    }
+
+    public void setCurrentTaskId(Long currentTaskId) {
+        this.currentTaskId = currentTaskId;
     }
 
     public Long getId() {
@@ -185,7 +195,7 @@ public class Employee {
         return "Employee{" +
                 "id=" + id +
                 ", networkId=" + networkId +
-                ", position='" + position + '\'' +
+                ", position=" + position +
                 ", login='" + login + '\'' +
                 ", password='" + password + '\'' +
                 ", inn='" + inn + '\'' +
@@ -199,6 +209,7 @@ public class Employee {
                 ", lastLat=" + lastLat +
                 ", lastLong=" + lastLong +
                 ", lastOnline=" + lastOnline +
+                ", currentTaskId=" + currentTaskId +
                 '}';
     }
 }

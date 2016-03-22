@@ -1,9 +1,12 @@
 package ua.kiev.netmaster.netmasterqualitycontrol.domain;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
+import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 
 import com.google.gson.Gson;
 
@@ -19,7 +22,6 @@ import java.net.URL;
 import java.util.Map;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
-import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 
@@ -29,10 +31,11 @@ import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 public class MyDownTask extends AsyncTask<Void, Void, String>{
 
     private Gson gson;
-    private Context context;
-    private String login, result, inputLine, gsonString, query, password, title, description, networkName, networkId, owners, networkgson, employee, task, taskId, emlpId, urlStr = "http://195.18.29.171:8082/";//"http://176.37.239.136:8082/";
+    private Activity activity;
+    private String login, result, inputLine, gsonString, query, password, type, address, title, description, networkName, networkId, owners, networkgson, employee, task, taskId, emlpId, urlStr = "http://195.18.29.171:8082/";//"http://176.37.239.136:8082/";
     private final String LOGIN="login", PASSWORD="password", GSONSTRING="gsonString", TITLE="title", DESCRIPTION="description",
-            URLTAIL ="urlTail", EMPLOYEE="employee", TASK="task", EMPLID="emlpId", TASKID="taskId", NETWORKNAME="networkname", NETWORKID="networkId", NETWORKGSON="networkgson", OWNERS="owners";
+            URLTAIL ="urlTail", EMPLOYEE="employee", TASK="task", EMPLID="emlpId", TASKID="taskId", NETWORKNAME="networkname", NETWORKID="networkId",
+            NETWORKGSON="networkgson", OWNERS="owners", TYPE="type", ADDRESS="address";
     private Map<String,String> params;
     private URL url;
     private HttpURLConnection con;
@@ -41,18 +44,10 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
     private BufferedWriter writer;
     private BufferedReader in;
     private StringBuilder responses;
-    public static boolean isReachable;
+    //public static boolean isReachable;
 
-    public MyDownTask(String urlTeil, String login, String password, Context context) {
-        urlStr += urlTeil;
-        this.login = login;
-        this.password = password;
-        this.context = context;
-        gson = new Gson();
-    }
-
-    public MyDownTask(Map<String,String> params, Context context) {
-        this.context = context;
+    public MyDownTask(Map<String,String> params, Activity activity) {
+        this.activity = activity;
         this.params = params;
         login = params.get(LOGIN);
         password = params.get(PASSWORD);
@@ -67,40 +62,27 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         owners = params.get(OWNERS);
         networkId = params.get(NETWORKID);
         networkgson = params.get(NETWORKGSON);
+        type = params.get(TYPE);
+        address = params.get(ADDRESS);
         if(params.get(URLTAIL)==null)    choseUrlTail();
         else urlStr+=params.get(URLTAIL);
     }
 
-    public MyDownTask(String urlStrTail, String gsonString, Context context) {
-        this.urlStr+= urlStrTail;
-        this.gsonString = gsonString;
-        this.context = context;
-        gson = new Gson();
+    protected void onPreExecute() {
+        L.l("onPreExecute()", this);
     }
-
-    public MyDownTask(String urlStrTail, Context context) {
-        this.urlStr+= urlStrTail;
-        gson = new Gson();
-        this.context = context;
-    }
-
-
-
-    protected void onPreExecute() {}
 
     @Override
     protected String doInBackground(Void... params) {
-        Log.d(LoginActivity.LOG, "MyDownTask. doInBackground");
-        if(this.params!=null) return commonConnect();
-            else
-        return connect();
+        L.l("MyDownTask. doInBackground");
+        return commonConnect();
     }
 
+    @Override
     protected void onPostExecute(String result) {
-       // if(!isReachable) Toast.makeText(context, "No Internet connection! Try later.", Toast.LENGTH_LONG).show(); // TODO: 15.12.2015
-        //if(result.equals(context.getString(R.string.server_unreachable))){
-        //    L.t(context.getString(R.string.server_unreachable),context);
-        //}
+        L.l("onPostExecute() result = " + result); //// TODO: 15-Mar-16 log to service
+        if(activity!=null && result!=null && result.equals(activity.getString(R.string.server_unreachable))) ErrorDialog(result);
+        if(activity!=null && result!=null && result.equals("Not authenticated"))L.t("Not authenticated!", activity);
     }
 
     private void choseUrlTail(){
@@ -111,62 +93,9 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         if(taskId!=null) urlStr+="task/deleteTask";
         if(emlpId!=null) urlStr+="employee/deleteEmpl";
         if(networkName!=null) urlStr+="network/create";
-        if(networkId!=null) urlStr+="network/delete";
+        if(networkId!=null) urlStr+="network/deleteEmpl";
         if(networkgson!=null) urlStr+="network/update";
-    }
-
-    public String connect() {
-        Log.d(LoginActivity.LOG, "MyDownTask. connect");
-        if(params!=null) {  return commonConnect();}
-        CookieHandler.getDefault();
-        responses = new StringBuilder();
-        //con = null;
-
-        try {
-            Log.d(LoginActivity.LOG, "urlStr= "+urlStr);
-            url = new URL(urlStr);
-            con = (HttpURLConnection) url.openConnection();
-            con.setConnectTimeout(2000);
-            con.setRequestMethod("POST");
-            con.setDoInput(true);
-            con.setDoOutput(true);
-            builder = new Uri.Builder();
-            if((login != null && password != null)|(gsonString!=null)) {
-                if (login != null && password != null) {
-                    Log.d(LoginActivity.LOG, "connect(). login != null && password != null");
-                    builder.appendQueryParameter("login", login)
-                            .appendQueryParameter("password", password);
-                } else if (gsonString != null) {
-                    Log.d(LoginActivity.LOG, "connect(). gsonString != null");
-                    builder.appendQueryParameter("task", gsonString);
-                }
-                query = builder.build().getEncodedQuery();
-                Log.d(LoginActivity.LOG, "connect(). String query = "+query);
-                os = con.getOutputStream();
-                writer = new BufferedWriter(
-                        new OutputStreamWriter(os, "UTF-8"));
-                writer.write(query);
-                writer.flush();
-                writer.close();
-                os.close();
-            }
-            con.connect();
-
-            in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-
-            while ((inputLine = in.readLine()) != null) {
-                responses.append(inputLine);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (con != null) {
-                con.disconnect();
-            }
-        }
-        Log.d(LoginActivity.LOG, "MyDownTask. responses.toString() = " + responses.toString());
-        result = prepareToParseToGson(responses.toString());
-        return result;
+        if(type!=null) urlStr+="task/addTask";
     }
 
     private void appendQueryParameters(){
@@ -183,15 +112,17 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         if(owners!=null) builder.appendQueryParameter(OWNERS, owners);
         if(networkId!=null) builder.appendQueryParameter(NETWORKID, networkId);
         if(networkgson!=null)builder.appendQueryParameter(NETWORKGSON, networkgson);
-        L.l("String query = "+query);
+        if(type!=null) builder.appendQueryParameter(TYPE,type);
+        if(address!=null) builder.appendQueryParameter(ADDRESS, address);
+        //L.l("String query = "+query);
     }
 
     private String commonConnect() {
-        Log.d(LoginActivity.LOG, "MyDownTask. commonConnect()");
+        L.l("MyDownTask. commonConnect()");
         CookieHandler.getDefault();
         responses = new StringBuilder();
         try {
-            Log.d(LoginActivity.LOG, "urlStr= " + urlStr);
+            L.l("urlStr= " + urlStr);
             url = new URL(urlStr);
             con = (HttpURLConnection) url.openConnection();
             con.setConnectTimeout(2000);
@@ -201,7 +132,7 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
             builder = new Uri.Builder();
             appendQueryParameters();
             query = builder.build().getEncodedQuery();
-            Log.d(LoginActivity.LOG, "connect(). String query = " + query);
+            L.l("commonConnect(). String query = " + query);
             os = con.getOutputStream();
             writer = new BufferedWriter(
                     new OutputStreamWriter(os, "UTF-8"));
@@ -214,21 +145,23 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
             while ((inputLine = in.readLine()) != null) {
                 responses.append(inputLine);
             }
+            result = prepareToParseToGson(responses.toString());
         }catch (SocketTimeoutException ste){
-            return context.getString(R.string.server_unreachable);
+            L.l("catch (SocketTimeoutException ste)");
+            ste.printStackTrace();
+            result = "Server Unreachable";
         }catch (Exception e){
+            L.l("catch (Exception e)");
             e.printStackTrace();
         } finally {
-        if (con != null) {
-            con.disconnect();
+            if (con != null) {
+                con.disconnect();
+            }
         }
+        L.l("MyDownTask. NEW COMMON CONNECT! responses.toString() = " + responses.toString());
+        L.l("MyDownTask. NEW COMMON CONNECT! result = " + result);
+        return result;
     }
-    Log.d(LoginActivity.LOG, "MyDownTask. NEW COMMON CONNECT! responses.toString() = " + responses.toString());
-    result = prepareToParseToGson(responses.toString());
-    return result;
-    }
-
-
 
     private String prepareToParseToGson(String input) {
         int startChar = input.indexOf('[');
@@ -236,10 +169,24 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
 
         if(startChar>0&startChar<5) {//// TODO: 25.12.2015  5??? 
             String res = input.substring(startChar, endChar + 1);
-            Log.d(LoginActivity.LOG, "MyDownTask. after prepareToParseToGson: " + res);
+            L.l("MyDownTask. after prepareToParseToGson: " + res);
             return res;
         }else
             return input;
+    }
+
+    private void ErrorDialog(String description) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(activity);
+        alertDialog.setTitle(description+"(");
+        alertDialog.setMessage("Please, try to reconnect later.");
+        //alertDialog.setIcon(R.drawable.ic_warning);
+        alertDialog.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        alertDialog.show();
     }
 
     public Gson getGson() {

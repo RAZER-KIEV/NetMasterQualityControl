@@ -1,4 +1,4 @@
-package ua.kiev.netmaster.netmasterqualitycontrol.fragments;
+package ua.kiev.netmaster.netmasterqualitycontrol.fragments.lists;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -9,22 +9,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
-
-import com.google.gson.reflect.TypeToken;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
-import ua.kiev.netmaster.netmasterqualitycontrol.activities.MainActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
 import ua.kiev.netmaster.netmasterqualitycontrol.adapters.HolderTaskAdapter;
-import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.details.TaskDetailsFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs.CreateTaskDialog;
+import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 public class TaskFragment extends Fragment implements AdapterView.OnItemClickListener, View.OnClickListener {
 
@@ -43,19 +39,19 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        Log.d(LoginActivity.LOG, "TaskFragment. onAttach()");
+        L.l("TaskFragment. onAttach()");
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(LoginActivity.LOG, "TaskFragment. onCreate()");
+        L.l("TaskFragment. onCreate()");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(LoginActivity.LOG, "TaskFragment. onCreateView()");
+        L.l("TaskFragment. onCreateView()");
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_task, container, false);
     }
@@ -63,14 +59,15 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(LoginActivity.LOG, "TaskFragment. onActivityCreated()");
-       // MainActivity.commitFragment(new DetailsFragment(), getFragmentManager());
+        L.l("TaskFragment. onActivityCreated()");
+       // MainActivity.commitFragment(new NetworkDetailsFragment(), getFragmentManager());
         //tokenTask =  new TypeToken<List<Task>>(){};
         myApplication = (MyApplication) getActivity().getApplication();
+        myApplication.setToolbarTitle("Tasks", getActivity());
         listView = (ListView)getActivity().findViewById(R.id.taskListView);
         fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.setOnClickListener(this);
-        taskList = ((MyApplication)getActivity().getApplication()).updateTaskList();
+        taskList = ((MyApplication)getActivity().getApplication()).updateTaskList(getActivity());
         taskAdapter = new HolderTaskAdapter(getActivity(), taskList);
         listView.setAdapter(taskAdapter);
         listView.setOnItemClickListener(this);
@@ -81,7 +78,7 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(LoginActivity.LOG, "TaskFragment. onStart()");
+        L.l("TaskFragment. onStart()");
        // ListView taskList = (ListView)getActivity().findViewById(R.id.taskListView);
        // taskList.setOnItemClickListener(this);
         //initViews();
@@ -90,7 +87,7 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(LoginActivity.LOG, "TaskFragment. onResume()");
+        L.l("TaskFragment. onResume()");
         ((MyApplication)getActivity().getApplication()).setCurTask(null);
     }
 
@@ -98,44 +95,45 @@ public class TaskFragment extends Fragment implements AdapterView.OnItemClickLis
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(LoginActivity.LOG, "TaskFragment. onPause()");
+        L.l("TaskFragment. onPause()");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.d(LoginActivity.LOG, "TaskFragment. onStop()");
+        L.l("TaskFragment. onStop()");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Log.d(LoginActivity.LOG, "TaskFragment. onDestroyView()");
+        L.l("TaskFragment. onDestroyView()");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(LoginActivity.LOG, "TaskFragment. onDestroy()");
+        L.l("TaskFragment. onDestroy()");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d(LoginActivity.LOG, "TaskFragment. onDetach()");
+        L.l("TaskFragment. onDetach()");
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         task = taskList.get(i);
-        Log.d(LoginActivity.LOG,"TaskFragment. onItemClick(), task: "+task);
-        myApplication.commitFragment(DetailsFragment.newInstance(task), getFragmentManager());
+        L.l("TaskFragment. onItemClick(), task: " + task);
+        //myApplication.commitFragment(NetworkDetailsFragment.newInstance(task), getFragmentManager());
+        myApplication.commitFragment(TaskDetailsFragment.newInstance(i),getFragmentManager());
     }
 
     @Override
     public void onClick(View view) {
         if(view.getId()!=R.id.fab) return;
-            new CreateTaskDialog().show(getFragmentManager(),"AddTaskDialog");
+        new CreateTaskDialog().show(getFragmentManager(), "AddTaskDialog");
     }
 
     public List<Task> getTaskList() {

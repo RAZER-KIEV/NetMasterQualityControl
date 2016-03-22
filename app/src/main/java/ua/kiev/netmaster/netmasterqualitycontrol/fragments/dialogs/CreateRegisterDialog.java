@@ -1,4 +1,4 @@
-package ua.kiev.netmaster.netmasterqualitycontrol.fragments;
+package ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -13,7 +13,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
-import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
 import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
@@ -35,7 +34,7 @@ public class CreateRegisterDialog extends DialogFragment implements View.OnClick
 
 
     public static CreateRegisterDialog newInstance(String title) {
-        L.l("DetailsFragment.newInstance(Task task)");
+        L.l("NetworkDetailsFragment.newInstance(Task task)");
         CreateRegisterDialog f = new CreateRegisterDialog();
         L.l("-----------------------" + String.valueOf(f.getId()));
         Bundle args = new Bundle();

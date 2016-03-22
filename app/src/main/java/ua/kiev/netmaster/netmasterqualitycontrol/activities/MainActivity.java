@@ -1,57 +1,45 @@
 package ua.kiev.netmaster.netmasterqualitycontrol.activities;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.reflect.TypeToken;
-
 import java.net.CookieHandler;
-import java.net.CookieManager;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.CreateNetworkDialog;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.CreateRegisterDialog;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.CreateTaskDialog;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.DeleteDialogFragment;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.DetailsFragment;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.EmloyeeFragment;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.EventFragment;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.LogoutDialog;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.NetworkFragment;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.TaskFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.enums.TaskType;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.details.TaskDetailsFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs.CreateNetworkDialog;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs.CreateRegisterDialog;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs.CreateTaskDialog;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs.DeleteDialogFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.lists.EmloyeeFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.details.EmplDetailsFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.lists.EventFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs.LogoutDialog;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.lists.NetworkFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.lists.TaskFragment;
 import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 import ua.kiev.netmaster.netmasterqualitycontrol.service.MyService;
 
@@ -59,70 +47,52 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, CreateTaskDialog.AddTaskDialogCommunicator, DeleteDialogFragment.DeleteDialogFragComunicator, LogoutDialog.LogoutDialogCommunicator,
         CreateRegisterDialog.RegisterDialogCommunicator, CreateNetworkDialog.CreateNetworkDialogCommunicator {
 
-    //private final String saveBtnTag="saveBtnTag", deleteBtnTag="deleteBtnTag", acceptBtnTag="acceptBtnTag", contactBtnTag="contactBtnTag";
     private Employee me;
-    private Task task;
-    private List<Employee> emplList;
-    private TextView profileNameTv, profileNameTv1, profileNameTv2;
-    private ImageView userIconView;
+    private TextView profileNameTv;
     private Map<String,String> params;
-    DrawerLayout drawer;
-    NavigationView navigationView;
-
-    //// TODO: 2/16/2016 make nonstatic
-    private DetailsFragment detailsFragment;
-
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
     private boolean serviceStarted, bound;
     private ServiceConnection sConn;
-    private MyService myService;
-    private Map<Employee, Location> employeeLocationMap;
     private Intent intent;
-    private String result;
-    private TypeToken<List<Employee>> tokenEmpl;
     private MyApplication myApplication;
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(LoginActivity.LOG, "MainActivity. onCreate()");
+        L.l("MainActivity. onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         CookieHandler.getDefault();
         initViews();
         myApplication = (MyApplication) getApplication();
-        myApplication.updateEmplList();
-        myApplication.updateNetworkList();
-        myApplication.updateTaskList();
-        tokenEmpl = new TypeToken<List<Employee>>() {};
-        this.me = ((MyApplication)getApplication()).getMe(); //LoginActivity.getMe();
+        myApplication.setCurrentActivity(this);
+        int taskPos = getIntent().getIntExtra("taskPosition",-1);
+        L.l("taskPos = " + taskPos);
+        if(taskPos>=0) myApplication.commitFragment(TaskDetailsFragment.newInstance(taskPos), getSupportFragmentManager());// TODO: 21-Mar-16 NOT STARTING FRAGMENT!
+        myApplication.updateEmplList(this);
+        myApplication.updateNetworkList(this);
+        myApplication.updateTaskList(this);
+        this.me = ((MyApplication)getApplication()).getMe();
         servicePrepare();
         setFbProfile();
-        Log.d(LoginActivity.LOG, "MainActivity. onCreate() this.me =" + me);
-        onClickStartStop();
+        L.l("MainActivity. onCreate() this.me =" + me);
+        serviceStart();
+        if(taskPos>=0) myApplication.commitFragment(TaskDetailsFragment.newInstance(taskPos), getSupportFragmentManager());
+        else myApplication.commitFragment(new TaskFragment(), getSupportFragmentManager());
     }
 
     private void setFbProfile() {
-        Log.d(LoginActivity.LOG, "MainActivity. setFbProfile()");
-        // TODO: 24.12.2015
-        //NavigationView l = (NavigationView) findViewById(R.id.nav_view);
-        //LinearLayout ll = (LinearLayout) findViewById(R.id.linear_nav_header);  //not work. ll==null;
-       // profileNameTv1 = (TextView) drawer.findViewById(R.id.profileNameTv);   //null
-       // profileNameTv1 = (TextView) navigationView.findViewById(R.id.profileNameTv); //null
-        //profileNameTv1 = (TextView) findViewById(R.id.profileNameTv); //null
-        //profileNameTv1 = (TextView) findViewById(R.id.profileNameTv);
+        L.l("MainActivity. setFbProfile()");
         View  headerview = navigationView.inflateHeaderView(R.layout.nav_header_main);
-        //profileNameTv = (TextView)headerview.findViewById(R.id.profileNameTv);
         LinearLayout linearLayout = (LinearLayout)headerview.findViewById(R.id.linear_nav_header);
         profileNameTv = new TextView(this);
         profileNameTv.setGravity(Gravity.BOTTOM);
         profileNameTv.setTextColor(Color.WHITE);
-       // profileNameTv.setText(LoginActivity.getProfile().getFirstName()+" "+LoginActivity.getProfile().getLastName());
         if(myApplication.getFbProfile()!=null){
-            Log.d(LoginActivity.LOG, "MainActivity. setFbProfile()  LoginActivity.getProfile()!=null");
             profileNameTv.setText(myApplication.getFbProfile().getFirstName()+" "+myApplication.getFbProfile().getLastName());// TODO: 23.12.2015
         }else if (myApplication.getMe()!=null){
-            Log.d(LoginActivity.LOG, "MainActivity. setFbProfile()  MainActivity.getMe()!=null");
             profileNameTv.setText(me.getLogin() + " " + me.getPosition());
         }
         linearLayout.addView(profileNameTv);
@@ -132,7 +102,6 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         L.l("MainActivity. onStart()");
-        //intent = new Intent(this, MyService.class);
         bindService(new Intent(this, MyService.class), sConn, 0);
     }
 
@@ -151,7 +120,7 @@ public class MainActivity extends AppCompatActivity
         sConn = new ServiceConnection() {
             public void onServiceConnected(ComponentName name, IBinder binder) {
                 L.l("MainActivity onServiceConnected");
-                myService = ((MyService.MyBinder) binder).getService();
+                ((MyService.MyBinder) binder).getService();
                 bound = true;
             }
             public void onServiceDisconnected(ComponentName name) {
@@ -161,30 +130,42 @@ public class MainActivity extends AppCompatActivity
         };
     }
 
+    public void serviceStart(){
+        if(!myApplication.isServiceStarted()){
+            startService(new Intent(this, MyService.class));
+            myApplication.setServiceStarted(true);
+        }
+    }
+
+    public void serviceStop(){
+        if(myApplication.isServiceStarted()){
+            stopService(new Intent(this, MyService.class));
+            myApplication.setServiceStarted(false);
+        }
+    }
+
     public void onClickStartStop() {
         L.l("MainActivity.  onClickStart()");
-        if(!serviceStarted){
-            startService(intent=new Intent(this, MyService.class));
-            serviceStarted=true;
+        if(!myApplication.isServiceStarted()){
+            serviceStart();
         }else {
-            stopService(intent);
-            serviceStarted=false;
+            serviceStop();
         }
-        L.t("Service works = " + serviceStarted, this);
+        L.t("Service works = " + myApplication.isServiceStarted(), this);
     }
 
     private void initViews(){
-        Log.d(LoginActivity.LOG, "MainActivity. initViews()");
+        L.l("MainActivity. initViews()");
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -207,7 +188,6 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            //getSupportFragmentManager().
             if(getSupportFragmentManager().getBackStackEntryCount()==0){
                 new LogoutDialog().show(getSupportFragmentManager(), "tag");
             } else super.onBackPressed();
@@ -233,7 +213,7 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         return super.onOptionsItemSelected(item);*/
-        onNavigationItemSelected(item);
+        onNavigationItemSelected(item); //// TODO: 11-Mar-16
         return super.onOptionsItemSelected(item);
     }
 
@@ -249,12 +229,12 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, MapsActivity.class);
             startActivity(intent);
         } else if (id == R.id.manage_my_prof) {
-            myApplication.commitFragment(detailsFragment = DetailsFragment.newInstance(myApplication.getMe()), getSupportFragmentManager());
+            myApplication.commitFragment(new EmplDetailsFragment(), getSupportFragmentManager());
         } else if (id == R.id.nav_service) {
             onClickStartStop();
-        } else if (id == R.id.nav_logOut){
+        } else if (id == R.id.nav_logOut) {
             goToLoginActivity();
-        }else  if(id == R.id.nav_networks){
+        }else  if(id == R.id.nav_networks) {
             myApplication.commitFragment(new NetworkFragment(), getSupportFragmentManager());
         }else  if(id ==R.id.nav_events){
             myApplication.commitFragment(new EventFragment(),getSupportFragmentManager());
@@ -265,31 +245,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onAddTaskDialogData(String title, String description) {
-        L.l("MainActivity. onAddTaskDialogData()");
-        Map<String,String> params = new HashMap<>();
-        params.put(getString(R.string.title), title);
-        params.put(getString(R.string.description), description);
-        //params.put(getString(R.string.urlStr), "");
-        String res = "";
-        try {
-            res = new MyDownTask(params,this).execute().get();
-        } catch (InterruptedException|ExecutionException e) {
-            e.printStackTrace();
-        }
-        Toast.makeText(this,"Task created = " +res, Toast.LENGTH_LONG).show();
-        myApplication.commitFragment(new TaskFragment(), getSupportFragmentManager());
-    }
-
-    public Task getTask() {
-        return task;
-    }
-
-    @Override
-    public void delete(View v) {
+    public void deleteEmpl(View v) {
             if(v.getId()==R.id.create_dialog){
-                ((DetailsFragment)getSupportFragmentManager().findFragmentByTag(getString(R.string.detailsFragment))).emplOnClickDeleteParams();
-            //detailsFragment.emplOnClickDeleteParams();// TODO: 04.01.2016
+                ((EmplDetailsFragment)getSupportFragmentManager().findFragmentByTag(getString(R.string.EmplDetailsFragment))).emplOnClickDeleteParams();
             }
     }
 
@@ -310,10 +268,14 @@ public class MainActivity extends AppCompatActivity
     public void goToLoginActivity() {
         L.l("goToLoginActivity", this);
         getSupportFragmentManager().popBackStackImmediate();
-        myApplication.setMe(null);
+        //myApplication.setMe(null);
         myApplication.setFbProfile(null);
         super.onBackPressed();
-        //super.onBackPressed();
+    }
+
+    @Override
+    public Long onAddTaskDialogData(TaskType type, String address) {
+       return myApplication.onAddTaskDialogData(type, address);
     }
 
     @Override
@@ -343,7 +305,6 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
@@ -357,11 +318,7 @@ public class MainActivity extends AppCompatActivity
             myApplication.commitFragment(new NetworkFragment(), getSupportFragmentManager());
         }catch (Exception e){
             e.printStackTrace();
-            L.t("Creation faild! "+e,this);
+            L.t("Creation failed! "+e,this);
         }
-    }
-
-    public List<Employee> getEmplList() {
-        return emplList;
     }
 }

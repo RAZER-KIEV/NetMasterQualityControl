@@ -194,7 +194,7 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
         params.clear();
         params.put(getString(R.string.employee), gson.toJson(me));
         try {
-            result = new MyDownTask(params,this).execute().get();
+            result = new MyDownTask(params,null).execute().get();
             L.l("my location updated on server = " + result);
         } catch (InterruptedException|ExecutionException e) {
             e.printStackTrace();
@@ -207,7 +207,7 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
         params.clear();
         params.put(myApplication.getString(R.string.urlTail), getString(R.string.event_getLastNews));
         try{
-            result = new MyDownTask(params,getApplicationContext()).execute().get();
+            result = new MyDownTask(params,null).execute().get();
             L.l("news list = " + result);
             List<MyEvent> news = gson.fromJson(result,  token.getType());
             if(news!=null && news.size()>0){

@@ -1,12 +1,10 @@
-package ua.kiev.netmaster.netmasterqualitycontrol.fragments;
-
+package ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,30 +13,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
-import ua.kiev.netmaster.netmasterqualitycontrol.activities.MainActivity;
-import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
+import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Created by ПК on 04.01.2016.
  */
-public class DeleteDialogFragment extends DialogFragment implements View.OnClickListener {
-
-    private MyApplication myApplication;
-    private Button deleteDtn, cancel;
+public class LogoutDialog extends DialogFragment implements View.OnClickListener {
+    private Button ExitBtn, cancel;
     private EditText loginEt, passwordEt;
-    private DeleteDialogFragComunicator deleteDialogFragComunicator;
-    private String loginStr, passwordStr;
+    private LogoutDialogCommunicator logoutDialogCommunicator;
     private TextView loginTv, passwordTv, dialogTitleTv;
-
-    public DeleteDialogFragment() {
-        // Required empty public constructor
-    }
+    private static boolean exit=false;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        deleteDialogFragComunicator = (DeleteDialogFragComunicator) activity;
-        myApplication = (MyApplication) activity.getApplication();
+        logoutDialogCommunicator = (LogoutDialogCommunicator) activity;
     }
 
     @NonNull
@@ -47,10 +37,10 @@ public class DeleteDialogFragment extends DialogFragment implements View.OnClick
         //return super.onCreateDialog(savedInstanceState);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.addtask_dialog, null);
-        deleteDtn = (Button)view.findViewById(R.id.create_dialog);
-        deleteDtn.setText(R.string.delete);
+        ExitBtn = (Button)view.findViewById(R.id.create_dialog);
+        ExitBtn.setText(R.string.logout);
         cancel = (Button)view.findViewById(R.id.cancel_dialog);
-        deleteDtn.setOnClickListener(this);
+        ExitBtn.setOnClickListener(this);
         cancel.setOnClickListener(this);
         loginEt = (EditText)view.findViewById(R.id.etTitle);
         loginEt.setVisibility(View.GONE);
@@ -61,7 +51,7 @@ public class DeleteDialogFragment extends DialogFragment implements View.OnClick
         passwordTv = (TextView) view.findViewById(R.id.descriptionTv);
         passwordTv.setVisibility(View.GONE);
         dialogTitleTv = (TextView) view.findViewById(R.id.dialogTitleTv);
-        dialogTitleTv.setText(R.string.delete_Employee);
+        dialogTitleTv.setText(R.string.do_logout);
         AlertDialog.Builder builder  = new AlertDialog.Builder(getActivity());
         builder.setView(view);
         return builder.create();
@@ -69,15 +59,16 @@ public class DeleteDialogFragment extends DialogFragment implements View.OnClick
 
     @Override
     public void onClick(View view) {
+        L.l("onClick", this);
         if(view.getId()==R.id.create_dialog){
-            deleteDialogFragComunicator.delete(view);
-            myApplication.commitFragment(new EmloyeeFragment(), getFragmentManager());
+            logoutDialogCommunicator.goToLoginActivity();
             dismiss();
         }else {
             dismiss();
         }
     }
-    public interface DeleteDialogFragComunicator {
-        void delete(View v);
+    public interface LogoutDialogCommunicator{
+        void goToLoginActivity();
     }
+
 }

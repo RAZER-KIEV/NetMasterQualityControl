@@ -5,6 +5,7 @@ import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Network;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
 import ua.kiev.netmaster.netmasterqualitycontrol.enums.EmplPossition;
+import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 /**
  * Created by RAZER on 2/9/2016.
@@ -26,11 +27,12 @@ public class MySecurity {
             if(changeMyself) return true;
             areWeInOneNetwork = e.getNetworkId()!=null && e.getNetworkId().equals(myApp.getMe().getNetworkId());
             iAmMajor = myApp.getMe().getPosition().getPriority()>e.getPosition().getPriority();
+            L.l("MySecurity: iAmMajor = " +iAmMajor + " areWeInOneNetwork = "+ areWeInOneNetwork);
             if(areWeInOneNetwork & iAmMajor) return true;
             return false;
         }else if(o instanceof Network){
             Network n = (Network)o;
-            if(myApp.getMe().getNetworkId().equals(n.getNetworkId()) & myApp.getMe().getPosition().equals(EmplPossition.SUPERADMIN)){
+            if(myApp.getMe().getNetworkId()!= null && myApp.getMe().getNetworkId().equals(n.getNetworkId()) && myApp.getMe().getPosition().equals(EmplPossition.SUPERADMIN)){
                 return true;
             }else return false;
         }

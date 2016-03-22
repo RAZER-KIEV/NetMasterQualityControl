@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/editText_field_dimen_3dp">
+
+        <TextView
+            android:layout_width="@dimen/networkt_tvs_width"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Network ID"
+            android:textAlignment="center"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/network_id_tv"
+            android:layout_weight=".6"
+            android:textAlignment="center"
+            />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/editText_field_dimen_3dp"
+        >
+
+        <TextView
+            android:layout_width="@dimen/networkt_tvs_width"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Name"
+            android:textAlignment="center"
+            />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/network_name_et"
+            android:layout_weight="1"
+            android:background="@drawable/edittext_costom_rouded"
+            android:padding="@dimen/editText_field_dimen_3dp"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/editText_field_dimen_3dp"
+        >
+
+        <TextView
+            android:layout_width="@dimen/networkt_tvs_width"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Contacts"
+            android:textAlignment="center"
+            />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/network_contacts_et"
+            android:layout_weight="1"
+            android:textColor="@color/primary_text"
+            android:textSize="18sp"
+            android:background="@drawable/edittext_costom_rouded"
+            android:padding="@dimen/editText_field_dimen_3dp"
+            android:textAlignment="center"/>
+
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/password_row"
+        android:layout_margin="@dimen/editText_field_dimen_3dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/Password"
+            android:textAlignment="center"
+            />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/empl_password_et"
+            android:layout_weight="1"
+            android:background="@drawable/edittext_costom_rouded"
+            android:padding="@dimen/editText_field_dimen_3dp"
+            android:textAlignment="center"
+            android:inputType="textPassword" />
+
+    </TableRow>
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/editText_field_dimen_3dp">
+
+        <TextView
+            android:layout_width="@dimen/networkt_tvs_width"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Owners"
+            android:textAlignment="center"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/network_owners_tv"
+            android:layout_weight="1"
+            android:padding="@dimen/editText_field_dimen_3dp"
+            android:textSize="18sp"
+            android:textColor="@color/primary_text"
+            android:background="@drawable/edittext_costom_rouded"
+            android:textAlignment="center" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="@dimen/plus_one_button_size"
+            android:layout_height="@dimen/plus_one_button_size"
+            android:text="+"
+            android:layout_marginLeft="@dimen/editText_field_dimen_3dp"
+            android:visibility="gone"
+            android:background="@drawable/plus_one"
+            android:id="@+id/owners_plus_btn" />
+
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/editText_field_dimen_3dp"
+        >
+
+        <TextView
+            android:layout_width="@dimen/networkt_tvs_width"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Employees"
+            android:textAlignment="center"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/network_employees_tv"
+            android:layout_weight=".6"
+            android:padding="@dimen/editText_field_dimen_3dp"
+            android:textColor="@color/primary_text"
+            android:textSize="18sp"
+            android:background="@drawable/edittext_costom_rouded"
+            android:textAlignment="center" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="@dimen/plus_one_button_size"
+            android:layout_height="@dimen/plus_one_button_size"
+            android:text="+"
+            android:layout_marginLeft="@dimen/editText_field_dimen_3dp"
+            android:visibility="gone"
+            android:background="@drawable/plus_one"
+            android:id="@+id/empl_plus_btn" />
+
+    </TableRow>
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/editText_field_dimen_3dp">
+
+        <TextView
+            android:layout_width="@dimen/networkt_tvs_width"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Partners"
+            android:textAlignment="center"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/network_partners_tv"
+            android:layout_weight="1"
+            android:textColor="@color/primary_text"
+            android:background="@drawable/edittext_costom_rouded"
+            android:textSize="18sp"
+            android:padding="@dimen/editText_field_dimen_3dp"
+            android:textAlignment="center"/>
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="@dimen/plus_one_button_size"
+            android:layout_height="@dimen/plus_one_button_size"
+            android:text="+"
+            android:visibility="gone"
+            android:layout_marginLeft="@dimen/editText_field_dimen_3dp"
+            android:background="@drawable/plus_one"
+            android:id="@+id/partners_plus_btn" />
+
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/editText_field_dimen_3dp">
+
+        <TextView
+            android:layout_width="@dimen/networkt_tvs_width"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Offices"
+            android:textAlignment="center"
+            />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/offices_tv"
+            android:layout_weight=".6"
+            android:textColor="@color/primary_text"
+            android:padding="@dimen/editText_field_dimen_3dp"
+            android:background="@drawable/edittext_costom_rouded"
+            android:textSize="18sp"
+            android:textAlignment="center"
+            />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="@dimen/plus_one_button_size"
+            android:layout_height="@dimen/plus_one_button_size"
+            android:text="+"
+            android:visibility="gone"
+            android:layout_marginLeft="@dimen/editText_field_dimen_3dp"
+            android:background="@drawable/plus_one"
+            android:id="@+id/offices_plus_btn" />
+
+    </TableRow>
+
+</LinearLayout>

@@ -10,20 +10,29 @@ public class Network {
         private String name;
         private Long[] owners;
         private Long[] employees;
-        private Long[] tasks;
         private Long[] friendlyNetworks;
         private String contacts;
+        private Long[] offices;
+
 
         public Network() {}
 
-    public Network(Long networkId, String name, Long[] owners, Long[] employees, Long[] tasks, Long[] frindlyNetworks, String contacts) {
+    public Network(Long networkId, String name, Long[] owners, Long[] employees, Long[] friendlyNetworks, String contacts, Long[] offices) {
         this.networkId = networkId;
         this.name = name;
         this.owners = owners;
         this.employees = employees;
-        this.tasks = tasks;
-        this.friendlyNetworks = frindlyNetworks;
+        this.friendlyNetworks = friendlyNetworks;
         this.contacts = contacts;
+        this.offices = offices;
+    }
+
+    public Long[] getOffices() {
+        return offices;
+    }
+
+    public void setOffices(Long[] offices) {
+        this.offices = offices;
     }
 
     public Long getNetworkId() {
@@ -58,14 +67,6 @@ public class Network {
             this.employees = employees;
         }
 
-        public Long[] getTasks() {
-            return tasks;
-        }
-
-        public void setTasks(Long[] tasks) {
-            this.tasks = tasks;
-        }
-
         public Long[] getFriendlyNetworks() {
             return friendlyNetworks;
         }
@@ -82,16 +83,16 @@ public class Network {
             this.contacts = contacts;
         }
 
-        @Override
-        public String toString() {
-            return "Network{" +
-                    "networkId=" + networkId +
-                    ", name='" + name + '\'' +
-                    ", owners=" + Arrays.toString(owners) +
-                    ", employees=" + Arrays.toString(employees) +
-                    ", tasks=" + Arrays.toString(tasks) +
-                    ", friendlyNetworks=" + Arrays.toString(friendlyNetworks) +
-                    ", contacts='" + contacts + '\'' +
-                    '}';
-        }
+    @Override
+    public String toString() {
+        return "Network{" +
+                "networkId=" + networkId +
+                ", name='" + name + '\'' +
+                ", owners=" + Arrays.toString(owners) +
+                ", employees=" + Arrays.toString(employees) +
+                ", friendlyNetworks=" + Arrays.toString(friendlyNetworks) +
+                ", contacts='" + contacts + '\'' +
+                ", offices=" + Arrays.toString(offices) +
+                '}';
+    }
 }

@@ -5,6 +5,7 @@ import java.util.Date;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.enums.TaskPriority;
 import ua.kiev.netmaster.netmasterqualitycontrol.enums.TaskStatus;
+import ua.kiev.netmaster.netmasterqualitycontrol.enums.TaskType;
 
 /**
  * Created by ПК on 08.12.2015.
@@ -15,11 +16,12 @@ public class Task {
     private Long taskId;
     private Long networkId;
     private Long[] executerIds;
-    private String title;
+    private TaskType taskType;
+    //private String title;
     private String description;
     private String address;
-    private String latitude;
-    private String longitude;
+    private Double latitude;
+    private Double longitude;
     private Date published;
     private Date accepted;
     private Date done;
@@ -29,11 +31,11 @@ public class Task {
     public Task() {
     }
 
-    public Task(Long taskId, Long networkId, Long[] executerIds, String title, String description, String address, String latitude, String longitude, Date published, Date accepted, Date done, TaskStatus status, TaskPriority priority) {
+    public Task(Long taskId, Long networkId, Long[] executerIds, TaskType taskType, String description, String address, Double latitude, Double longitude, Date published, Date accepted, Date done, TaskStatus status, TaskPriority priority) {
         this.taskId = taskId;
         this.networkId = networkId;
         this.executerIds = executerIds;
-        this.title = title;
+        this.taskType = taskType;
         this.description = description;
         this.address = address;
         this.latitude = latitude;
@@ -61,12 +63,12 @@ public class Task {
         this.executerIds = executerIds;
     }
 
-    public String getTitle() {
-        return title;
+    public TaskType getTaskType() {
+        return taskType;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setTaskType(TaskType taskType) {
+        this.taskType = taskType;
     }
 
     public String getDescription() {
@@ -85,19 +87,19 @@ public class Task {
         this.address = address;
     }
 
-    public String getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-    public String getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
@@ -156,7 +158,7 @@ public class Task {
                 "taskId=" + taskId +
                 ", networkId=" + networkId +
                 ", executerIds=" + Arrays.toString(executerIds) +
-                ", title='" + title + '\'' +
+                ", taskType=" + taskType +
                 ", description='" + description + '\'' +
                 ", address='" + address + '\'' +
                 ", latitude='" + latitude + '\'' +
@@ -164,8 +166,8 @@ public class Task {
                 ", published=" + published +
                 ", accepted=" + accepted +
                 ", done=" + done +
-                ", status='" + status + '\'' +
-                ", priority='" + priority + '\'' +
+                ", status=" + status +
+                ", priority=" + priority +
                 '}';
     }
 }

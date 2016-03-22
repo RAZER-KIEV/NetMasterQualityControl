@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,17 +19,19 @@ import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
  */
 public class HolderTaskAdapter  extends BaseAdapter{
     private Context ctx;
-    //private LayoutInflater lInflater;
+    private SimpleDateFormat format;
     private List<Task> objects = Collections.emptyList();
 
     public HolderTaskAdapter(Context ctx, List<Task> objects) {
         this.ctx = ctx;
         this.objects = objects;
+        format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance();
     }
 
     @Override
     public int getCount() {
-        return objects.size();
+        if(objects!=null) return objects.size();
+        else return 0;
     }
 
     @Override
@@ -46,7 +49,6 @@ public class HolderTaskAdapter  extends BaseAdapter{
     public View getView(int i, View convertView, ViewGroup viewGroup) {
         MyViewHolder myViewHolder;
         Task task = getTask(i);
-
         String[] datetine = task.getPublished().toString().split(" ");
         if(convertView ==null){
             LayoutInflater inflater = (LayoutInflater) ctx
@@ -61,10 +63,10 @@ public class HolderTaskAdapter  extends BaseAdapter{
         }else {
             myViewHolder = (MyViewHolder)convertView.getTag();
         }
-        myViewHolder.holderTV1.setText(datetine[0] + " "+datetine[1]+" "+datetine[2]+" "+datetine[3]);
+        myViewHolder.holderTV1.setText(task.getTaskType().toString());//datetine[0] + " "+datetine[1]+" "+datetine[2]+" "+datetine[3]);
         myViewHolder.holderTV2.setText("priority: "+task.getPriority());
         myViewHolder.holderTV3.setText(task.getAddress());
-        myViewHolder.holderTV3.setText(task.getDescription());
+        myViewHolder.holderTV4.setText(format.format(task.getPublished()));
 
         return convertView;
     }

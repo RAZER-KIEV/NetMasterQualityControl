@@ -10,7 +10,9 @@ import android.widget.Toast;
 public class L {
     public static String T="myLogs";
     public static void l(String s, Object obj){
-        Log.d(T,obj.getClass().getName()+" "+s);
+        String str[]=obj.getClass().toString().split("\\.");
+        String objName = str[str.length-1].trim();
+        Log.d(T,objName+" "+s);
     }
     public static void l(String s){
         Log.d(T,s);

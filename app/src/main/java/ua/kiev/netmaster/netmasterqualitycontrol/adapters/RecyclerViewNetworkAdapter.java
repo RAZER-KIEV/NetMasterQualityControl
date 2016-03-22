@@ -36,7 +36,9 @@ public class RecyclerViewNetworkAdapter extends RecyclerView.Adapter<RecyclerVie
 
     @Override
     public int getItemCount() {
+        if(networkList!=null)
         return networkList.size();
+        else return 0;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{

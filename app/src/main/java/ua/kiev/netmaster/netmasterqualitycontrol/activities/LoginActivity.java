@@ -4,27 +4,21 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,21 +30,19 @@ import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.google.gson.Gson;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
-import ua.kiev.netmaster.netmasterqualitycontrol.fragments.CreateRegisterDialog;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs.CreateRegisterDialog;
 import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 import static android.Manifest.permission.READ_CONTACTS;
@@ -70,13 +62,15 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
      */
     private MyDownTask mAuthTask = null;
     // UI references.
+    private CheckBox savePasswordChb;
     private AutoCompleteTextView loginView;
     private EditText mPasswordView;
-    private View mProgressView;
-    private View mLoginFormView;
-    private String result="", access, res;
-    private String login, password;
-    public static final String LOG = "myLogs";
+    private View mProgressView, mLoginFormView;
+    //private View mLoginFormView;
+    private String result="", access, res, login, password;
+    private boolean serverIsUnreachable;
+   // private String login, password;
+    //public static final String LOG = "myLogs";
     private LoginButton loginButton;
     private Profile profile;
     private MyApplication myApplication;
@@ -97,17 +91,17 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
 
         @Override
         public void onCancel() {
-            Log.d(LoginActivity.LOG, "LoginActivity. FacebookCallback : onCancel() ");
+            L.l("LoginActivity. FacebookCallback : onCancel() ");
         }
 
         @Override
         public void onError(FacebookException error) {
-            Log.d(LoginActivity.LOG, "LoginActivity. FacebookCallback : onError() ");
+            L.l("LoginActivity. FacebookCallback : onError() ");
         }
     };
 
     private void loginWithFb(){
-        while (!authenticate(profile.getFirstName(), profile.getFirstName() + profile.getId())) {
+        while (!authenticate(profile.getFirstName(), profile.getFirstName() + profile.getId()) & !serverIsUnreachable ) {
             registerDialogData(profile.getFirstName(), profile.getFirstName() + profile.getId());
         }
         goToMainActivity();
@@ -121,6 +115,7 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
         myApplication = (MyApplication) getApplication();
+        myApplication.setCurrentActivity(this);
         setContentView(R.layout.activity_login);
         // Set up the login form.
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
@@ -148,23 +143,22 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
         loginButton.registerCallback(callbackManager, facebookCallback);
     }
 
+    private void setLogPassToViews(){
+        String[] logPass = myApplication.readLoginPasswordFromShPref();
+        if(logPass[0]!=null){
+            loginView.setText(logPass[0]);
+            mPasswordView.setText(logPass[1]);
+            savePasswordChb.setChecked(true);
+        }
+    }
+
     private void initViews() {
+        savePasswordChb  = (CheckBox) findViewById(R.id.savePasswordChb);
         loginButton = (LoginButton) findViewById(R.id.login_button);
         loginButton.setReadPermissions();
         loginView = (AutoCompleteTextView) findViewById(R.id.email);
-        //populateAutoComplete();
         mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                        attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
-
+        setLogPassToViews();
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,7 +167,6 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
 
             }
         });
-
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }
@@ -182,7 +175,7 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        Log.d(LOG, "LoginActivity. onPostResume()");
+        L.l("LoginActivity. onPostResume()");
        /* if(profile!=null){
             myApplication.setFbProfile(profile);
             loginWithFb();
@@ -194,64 +187,11 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
         super.onResume();
         showProgress(false);
         access = null;
-        Log.d(LOG, "LoginActivity. onResume()");
+        L.l("LoginActivity. onResume()");
     }
 
-   /* private void populateAutoComplete() {
-        Log.d(LOG, "LoginActivity. populateAutoComplete()");
-        if (!mayRequestContacts()) {
-            return;
-        }
-        getLoaderManager().initLoader(0, null, this);
-    }*/
-
-    private boolean mayRequestContacts() {
-        Log.d(LOG, "LoginActivity. mayRequestContacts()");
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(loginView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        Log.d(LOG,"LoginActivity. onRequestPermissionsResult()");
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
-    }*/
-
-
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
     private void attemptLogin(){
-        Log.d(LOG,"LoginActivity. attemptLogin()");
-
-
+        L.l("LoginActivity. attemptLogin()");
         // Reset errors.
         loginView.setError(null);
         mPasswordView.setError(null);
@@ -287,7 +227,7 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
           if(authenticate(login, password))goToMainActivity();
             else {
               Toast.makeText(this,"Authentication Error!",Toast.LENGTH_SHORT).show();
-              new CreateRegisterDialog().show(getFragmentManager(), "RegisterDialog");
+              if(!serverIsUnreachable) new CreateRegisterDialog().show(getFragmentManager(), "RegisterDialog");
               //onResume();
           }
         }
@@ -295,7 +235,7 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
 
 
     private boolean authenticate(String login,String password){
-        Log.d(LOG, "LoginActivity. authenticate()");
+        L.l("LoginActivity. authenticate()");
         showProgress(true);
         Map<String, String> params=new HashMap<>();
         params.put(getString(R.string.login),login);
@@ -304,26 +244,26 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
         try {
             result = mAuthTask.execute().get().trim();
             if(result.equals(getString(R.string.server_unreachable))){
-                L.t(result,this);
-                L.l(result,this);
-                return false;
+                L.t(result, this);
+                L.l(result, this);
+                serverIsUnreachable=true;
             }
-            Log.d(LOG,"LoginActivity. authenticate(). result= "+result);
+            L.l("LoginActivity. authenticate(). result= " + result);
         } catch (InterruptedException|ExecutionException e) {
             e.printStackTrace();
         }
         int spaceIndex = result.indexOf(" ");
         if(spaceIndex>=0) {
             res = result.substring(spaceIndex).trim();
-            Log.d(LOG,"LoginActivity. authenticate(). res= "+res);
+            L.l("LoginActivity. authenticate(). res= " + res);
             access = result.substring(0, spaceIndex).trim();
-            Log.d(LOG,"LoginActivity. authenticate(). access= "+access);
+            L.l("LoginActivity. authenticate(). access= " + access);
         }
         if (access!=null&&access.equals("Auth_Success")) {
             L.l("access!=null&&access.equals(\"Auth_Success\")", this);
             Employee me1 = myApplication.getGson().fromJson(res, Employee.class);
             L.l("me1 = " + me1, this);
-            myApplication.setMe(myApplication.getGson().fromJson(res, Employee.class));
+            myApplication.setMe(me1);
             L.l("me: "+ myApplication.getMe());
             L.l("LoginActivity. trying start MainActivity");
             return true;
@@ -333,12 +273,15 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
     }
 
     private void goToMainActivity(){
+        if(savePasswordChb.isChecked()){
+            myApplication.saveLoginPasswordToShPref(login, password);
+        } else myApplication.clearLogPassShpref();
         Intent intentSuccess = new Intent(this, MainActivity.class);
         startActivity(intentSuccess);
     }
 
     private boolean isPasswordValid(String password) {
-        Log.d(LOG, "LoginActivity. isPasswordValid()");
+        L.l("LoginActivity. isPasswordValid()");
         return password.length() > 4;
     }
 
@@ -347,7 +290,7 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
-        Log.d(LOG, "LoginActivity. showProgress()");
+        L.l("LoginActivity. showProgress()");
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -460,13 +403,13 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(LOG,"LoginActivity. onPause()");
+        L.l("LoginActivity. onPause()");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(LOG, "LoginActivity. onDestroy()");
+        L.l("LoginActivity. onDestroy()");
     }
 }
 

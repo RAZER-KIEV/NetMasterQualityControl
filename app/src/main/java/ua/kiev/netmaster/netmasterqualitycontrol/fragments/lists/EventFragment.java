@@ -1,4 +1,4 @@
-package ua.kiev.netmaster.netmasterqualitycontrol.fragments;
+package ua.kiev.netmaster.netmasterqualitycontrol.fragments.lists;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -50,7 +50,8 @@ public class EventFragment extends Fragment {
         fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.setVisibility(View.GONE);
         myApplication = (MyApplication)getActivity().getApplication();
-        myEventList = myApplication.updateEventList();
+        myApplication.setToolbarTitle("Events", getActivity());
+        myEventList = myApplication.updateEventList(getActivity());
         recyclerViewEventAdapter = new RecyclerViewEventAdapter(myEventList);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(recyclerViewEventAdapter);

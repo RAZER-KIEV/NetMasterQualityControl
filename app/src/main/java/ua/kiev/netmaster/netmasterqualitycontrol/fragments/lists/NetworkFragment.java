@@ -1,4 +1,4 @@
-package ua.kiev.netmaster.netmasterqualitycontrol.fragments;
+package ua.kiev.netmaster.netmasterqualitycontrol.fragments.lists;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -14,6 +14,8 @@ import ua.kiev.netmaster.netmasterqualitycontrol.R;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
 import ua.kiev.netmaster.netmasterqualitycontrol.adapters.RecyclerViewNetworkAdapter;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Network;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.details.NetworkDetailsFragment;
+import ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs.CreateNetworkDialog;
 import ua.kiev.netmaster.netmasterqualitycontrol.listeners.NetworkRecyclerItemClickListener;
 
 /*
@@ -48,8 +50,8 @@ public class NetworkFragment extends Fragment implements View.OnClickListener {
         fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.setOnClickListener(this);
         myApplication = (MyApplication)getActivity().getApplication();
-        networkList = myApplication.updateNetworkList();
-
+        myApplication.setToolbarTitle("Networks", getActivity());
+        networkList = myApplication.updateNetworkList(getActivity());
         recyclerViewNetworkAdapter = new RecyclerViewNetworkAdapter(networkList);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(recyclerViewNetworkAdapter);
@@ -57,7 +59,7 @@ public class NetworkFragment extends Fragment implements View.OnClickListener {
                 new NetworkRecyclerItemClickListener(getActivity(), new NetworkRecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                       myApplication.commitFragment(DetailsFragment.newInstance(networkList.get(position)), getFragmentManager());
+                       myApplication.commitFragment(NetworkDetailsFragment.newInstance(position), getFragmentManager());
                     }
                 })
         );

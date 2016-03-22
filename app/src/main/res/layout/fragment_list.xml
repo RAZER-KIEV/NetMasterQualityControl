@@ -8,7 +8,7 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"/>
-    <!--tools:context="ua.kiev.netmaster.netmasterqualitycontrol.fragments.NetworkFragment"
-    android:name="ua.kiev.netmaster.netmasterqualitycontrol.fragments.NetworkFragment"
+    <!--tools:activity="ua.kiev.netmaster.netmasterqualitycontrol.fragments.lists.NetworkFragment"
+    android:name="ua.kiev.netmaster.netmasterqualitycontrol.fragments.lists.NetworkFragment"
     tools:listitem="@layout/fragment_network"
     />-->
