@@ -22,5 +22,7 @@
     <color name="divider">#B6B6B6</color>
     <color name="item2">#FFEB3B</color>
     <color name="item3">#FFF9C4</color>
-
+    <color name="color_light_red">#4fff1500</color>
+    <color name="color_light_yellow">#4FFFC800</color>
+    <color name="color_light_green">#4F59FF00</color>
 </resources>

@@ -16,22 +16,19 @@ import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
-import ua.kiev.netmaster.netmasterqualitycontrol.activities.LoginActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MainActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyEvent;
+import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
 import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 
 public class MyService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
@@ -51,7 +48,9 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
     private MyBinder binder = new MyBinder();
     private Gson gson;
     private String result;
-    private TypeToken<List<MyEvent>> token;
+    private TypeToken<List<MyEvent>> myEventListTypeToken;
+    private TypeToken<Employee> employeeTypeToken;
+    private TypeToken<Task> taskTypeToken;
     private Map<String,String> params;
 
 
@@ -64,9 +63,15 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
         gson = myApplication.getGson();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         timer = new Timer();
-        params = new HashMap<>();
-        token = new TypeToken<List<MyEvent>>(){};
+        params = myApplication.getParams();
+        initTokens();
         buildGoogleApiClient();
+    }
+
+    private void initTokens(){
+        myEventListTypeToken = myApplication.getMyEventListTypeToken();
+        employeeTypeToken = myApplication.getEmployeeTypeToken();
+        taskTypeToken = myApplication.getTaskTypeToken();
     }
 
     public void onDestroy() {
@@ -182,23 +187,23 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
         if (mLastLocation != null) {
             L.l(String.valueOf(mLastLocation.getLatitude()));
             L.l(String.valueOf(mLastLocation.getLongitude()));
-            me.setLastLat(mLastLocation.getLatitude());
-            me.setLastLong(mLastLocation.getLongitude());
-            myApplication.setMe(me);
             sentLatLongToServer();
         }
     }
 
     private void sentLatLongToServer(){
-        L.l("sentLatLongToServer()",this);
+        L.l("sentLatLongToServer()", this);
         params.clear();
-        params.put(getString(R.string.employee), gson.toJson(me));
+        params.put("latitude", String.valueOf(mLastLocation.getLatitude()));
+        params.put("longitude", String.valueOf(mLastLocation.getLongitude()));
+        params.put(getString(R.string.urlTail), "employee/updateLocation");
+        result = myApplication.sendRequest(params);
         try {
-            result = new MyDownTask(params,null).execute().get();
-            L.l("my location updated on server = " + result);
-        } catch (InterruptedException|ExecutionException e) {
+            myApplication.setMe((Employee) gson.fromJson(result, employeeTypeToken.getType()));
+        }catch (Exception e){
             e.printStackTrace();
         }
+        L.l("my location updated on server = " + result);
         params.clear();
     }
 
@@ -209,7 +214,7 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
         try{
             result = new MyDownTask(params,null).execute().get();
             L.l("news list = " + result);
-            List<MyEvent> news = gson.fromJson(result,  token.getType());
+            List<MyEvent> news = gson.fromJson(result, myEventListTypeToken.getType());
             if(news!=null && news.size()>0){
                 for(MyEvent event : news){
                     sendNotif(event.getEventId().intValue(),event.getMessage(), false);

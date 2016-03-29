@@ -15,19 +15,20 @@ import android.widget.TextView;
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
 
 /**
- * Created by RAZER on 2/9/2016.
+ * Created by RAZER on 22-Mar-16.
  */
-public class CreateNetworkDialog extends DialogFragment implements View.OnClickListener {
+public class CreateOfficeDialog extends DialogFragment implements View.OnClickListener  {
+
     private Button create, cancel;
     private EditText title, descripton;
-    private CreateNetworkDialogCommunicator createNetworkDialogCommunicator;
+    private CreateOfficeDialogCommunicator createOfficeDialogCommunicator;
     private String titleStr;
     private TextView descriptionTV, dialogTitle;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        createNetworkDialogCommunicator = (CreateNetworkDialogCommunicator)activity;
+        createOfficeDialogCommunicator = (CreateOfficeDialogCommunicator)activity;
     }
 
     @NonNull
@@ -36,7 +37,7 @@ public class CreateNetworkDialog extends DialogFragment implements View.OnClickL
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.addtask_dialog, null);
         dialogTitle = (TextView) view.findViewById(R.id.dialogTitleTv);
-        dialogTitle.setText(getString(R.string.createNetwork));
+        dialogTitle.setText(R.string.create_new_office);
 
         create = (Button)view.findViewById(R.id.create_dialog);
         cancel = (Button)view.findViewById(R.id.cancel_dialog);
@@ -59,14 +60,14 @@ public class CreateNetworkDialog extends DialogFragment implements View.OnClickL
     public void onClick(View view) {
         if(view.getId()==R.id.create_dialog){
             titleStr = title.getText().toString();
-            createNetworkDialogCommunicator.onCreateNetworkDialogData(titleStr);
+            createOfficeDialogCommunicator.onCreateOfficeDialogData(titleStr);
             dismiss();
         }else {
             dismiss();
         }
     }
-    public interface  CreateNetworkDialogCommunicator
+    public interface CreateOfficeDialogCommunicator
     {
-        void onCreateNetworkDialogData(String title);
+        void onCreateOfficeDialogData(String officeName);
     }
 }

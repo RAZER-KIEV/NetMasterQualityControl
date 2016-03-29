@@ -26,8 +26,10 @@ import com.oguzdev.circularfloatingactionmenu.library.SubActionButton;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyEvent;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.MyDownTask;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Network;
+import ua.kiev.netmaster.netmasterqualitycontrol.domain.Office;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
 import ua.kiev.netmaster.netmasterqualitycontrol.enums.TaskType;
 import ua.kiev.netmaster.netmasterqualitycontrol.fragments.details.EmplDetailsFragment;
@@ -52,16 +55,25 @@ import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 public class MyApplication extends Application{
 
     private Activity currentActivity;
+    //Lists
     private List<Employee> emplList;
     private List<Network> networkList;
     private List<Task> taskList;
     private List<MyEvent> myEventList;
-    //private Long tempId;
+    private List<Office> myOfficeList;
+    //Tokens
+    private TypeToken<List<MyEvent>> myEventListTypeToken;
+    private TypeToken<Employee> employeeTypeToken;
+    private TypeToken<Task> taskTypeToken;
+    private TypeToken<List<Office>> officeListTypeToken;
+    private TypeToken<List<Network>> networkListToken;
+    //My Objects
     private Employee me;
     private Employee employee;
     private Task curTask;
     private Network curNetwork;
     private Profile fbProfile;
+
     private Gson gson;
     private String login, password;
     private String response;
@@ -75,6 +87,7 @@ public class MyApplication extends Application{
     private SharedPreferences.Editor editor;
     private Map<String,String> params;
     private boolean serviceStarted;
+    private boolean needToFinish;
 
     @Override
     public void onCreate() {
@@ -82,10 +95,19 @@ public class MyApplication extends Application{
         L.l("onCreate()", this);
         printHashKey();
         gson = new Gson();
-        format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance();
+        format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
         sharedpreferences = getSharedPreferences("myShPrefs", Context.MODE_PRIVATE);
         editor = sharedpreferences.edit();
         params = new HashMap<>();
+        initTokens();
+    }
+
+    private void initTokens(){
+        myEventListTypeToken = new TypeToken<List<MyEvent>>(){};
+        employeeTypeToken = new TypeToken<Employee>(){};
+        taskTypeToken = new TypeToken<Task>(){};
+        officeListTypeToken = new TypeToken<List<Office>>() {};
+        networkListToken = new TypeToken<List<Network>>(){};
     }
 
     public void printHashKey(){
@@ -102,27 +124,8 @@ public class MyApplication extends Application{
         } catch (PackageManager.NameNotFoundException|NoSuchAlgorithmException e){e.printStackTrace();}
     }
 
-    @Override
-    public void onLowMemory() {
-        L.l("onLowMemory()", this);
-        super.onLowMemory();
-    }
-
-    @Override
-    public void onTerminate() {
-        L.l("onTerminate", this);
-        super.onTerminate();
-    }
-
-    @Override
-    public void onTrimMemory(int level) {
-        L.l("onTrimMemory()+ level = "+level, this);
-        super.onTrimMemory(level);
-    }
-
-
     public List<Employee> updateEmplList(Activity activity){
-        params.put(getString(R.string.urlTail), getString(R.string.employee_getAll));
+        getParams().put(getString(R.string.urlTail), getString(R.string.employee_getAll));
         try {
             String result = new MyDownTask(params,activity).execute().get();
             TypeToken<List<Employee>> tokenEmpl = new TypeToken<List<Employee>>() {};
@@ -131,7 +134,6 @@ public class MyApplication extends Application{
             e.printStackTrace();
             emplList = new ArrayList<>();
         }
-        params.clear();
         if(emplList!=null && emplList.size()>0){
             for(Employee e: emplList){
                 if(e.getId()==me.getId())me=e;
@@ -141,7 +143,7 @@ public class MyApplication extends Application{
     }
 
     public List<Task> updateTaskList(Activity activity){
-        params.put(getString(R.string.urlTail), getString(R.string.task_getAll));
+        getParams().put(getString(R.string.urlTail), getString(R.string.task_getAll));
         currentActivity = activity;
             try {
                 String result = new MyDownTask(params,activity).execute().get();
@@ -151,22 +153,19 @@ public class MyApplication extends Application{
                 e.printStackTrace();
                 taskList = new ArrayList<>();
             }
-        params.clear();
         return taskList;
     }
 
     public List<Network> updateNetworkList(Activity activity){
-        params.put(getString(R.string.urlTail), getString(R.string.network_getAll));
+        getParams().put(getString(R.string.urlTail), getString(R.string.network_getAll));
         try {
             String result = new MyDownTask(params,activity).execute().get();
-            TypeToken<List<Network>> tokenEmpl = new TypeToken<List<Network>>() {};
-            networkList = gson.fromJson(result, tokenEmpl.getType());
+            networkList = gson.fromJson(result, networkListToken.getType());
             setMyNetwork();
         } catch (Exception e){
             e.printStackTrace();
             networkList = new ArrayList<>();
         }
-        params.clear();
         return networkList;
     }
 
@@ -177,25 +176,36 @@ public class MyApplication extends Application{
     }
 
     public List<MyEvent> updateEventList(Activity activity) {
-        params.put(getString(R.string.urlTail), getString(R.string.event_getAllbyNetwork));
+        getParams().put(getString(R.string.urlTail), getString(R.string.event_getAllbyNetwork));
         try {
             String result = new MyDownTask(params,activity).execute().get();
-            TypeToken<List<MyEvent>> tokenEmpl = new TypeToken<List<MyEvent>>() {};
-            myEventList = gson.fromJson(result, tokenEmpl.getType());
+            myEventList = gson.fromJson(result, myEventListTypeToken.getType());
         }catch (Exception e){
             e.printStackTrace();
             myEventList = new ArrayList<>();
         }
-        params.clear();
         return myEventList;
     }
 
+    public List<Office> updateOfficeList(Activity activity) {
+        getParams().put(getString(R.string.urlTail), getString(R.string.office_getAll));
+        try {
+            String result = new MyDownTask(params,activity).execute().get();
+            myOfficeList = gson.fromJson(result, officeListTypeToken.getType());
+        }catch (Exception e){
+            e.printStackTrace();
+            myOfficeList = new ArrayList<>();
+        }
+        return myOfficeList;
+    }
 
     public void commitFragment(Fragment fragment, FragmentManager fragmentManager) {
+
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         String str[]=fragment.getClass().toString().split("\\.");
         String fragmentName = str[str.length-1].trim();
+        L.l(" MYAPPLICATION. commitFragment. - "+fragmentName);
         //L.l("fragment.getClass().getCanonicalName() = " + fragment.getClass().getCanonicalName(),this);
         fragmentTransaction.replace(R.id.contentLayout, fragment, fragmentName);
         fragmentTransaction.addToBackStack("BackTag");
@@ -203,18 +213,14 @@ public class MyApplication extends Application{
         fragmentManager.executePendingTransactions();
     }
 
-    /*private Employee getMefromServer() {
-        try {
-            Map<String,String> params=new HashMap<>();
-            params.put(getString(R.string.urlTail), getString(R.string.employee_getEmpl));
-            String result = new MyDownTask(params, getApplicationContext()).execute().get();
+    public Employee getEmplFromServer(Long id) {
+            getParams().put(getString(R.string.urlTail), getString(R.string.employee_getEmpl));
+            params.put(getString(R.string.id), String.valueOf(id));
+            String result = sendRequest(params); //new MyDownTask(params, getApplicationContext()).execute().get();
             TypeToken<Employee> tokenEmpl = new TypeToken<Employee>() {};
             me = gson.fromJson(result, tokenEmpl.getType());
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        return me;
-    }*/
+            return me;
+    }
 
     public String sendRequest(Map<String, String> params){
         try {
@@ -297,18 +303,13 @@ public class MyApplication extends Application{
         L.t(getString(R.string.no_permissions), this);
     }
 
-
     public void saveLoginPasswordToShPref(String login, String password){
-    // TODO: 14-Mar-16
-        //sharedpreferences = getSharedPreferences("myShPrefs", Context.MODE_PRIVATE);
-        //editor = sharedpreferences.edit();
         L.l("saveLoginPasswordToShPref() login = "+login+ ", password = "+password, this);
         editor.putString(getString(R.string.login), login);
         editor.putString(getString(R.string.password), password);
         editor.putBoolean("saved", true);
         editor.commit();
     }
-
 
     public String[] readLoginPasswordFromShPref(){
         login=sharedpreferences.getString(getString(R.string.login), null);
@@ -325,21 +326,17 @@ public class MyApplication extends Application{
 
     public Long onAddTaskDialogData(TaskType type, String address) {
         L.l("MainActivity. onAddTaskDialogData()");
-        Map<String,String> params = new HashMap<>();
-        params.put("type", getGson().toJson(type));
+        getParams().put("type", getGson().toJson(type));
         params.put("address", address);
         String res = sendRequest(params);
         Toast.makeText(currentActivity, "Task created = " + res, Toast.LENGTH_LONG).show();
-        params.clear();
+        getParams().put(getString(R.string.urlTail), "task/getTask");
+        params.put(getString(R.string.taskId), res);
         try{
-            params.put(getString(R.string.urlTail), "task/getTask");
-            params.put(getString(R.string.taskId), res);
             setCurTask(getGson().fromJson(sendRequest(params), Task.class));
         }catch (Exception e){
             e.printStackTrace();
         }
-        //params.put(getString(R.string.urlTail),"task/getTask");
-        //myApplication.commitFragment(new TaskFragment(), getSupportFragmentManager());
         return Long.valueOf(res);
     }
 
@@ -353,29 +350,87 @@ public class MyApplication extends Application{
         return names;
     }
 
-    //     Getters  Setters
-    public List<Employee> getEmplList() {
-        return emplList;
+    public String getOfficeNames(Long[] ids){
+        String names="";
+        for(Long id: ids){
+            for(Office office  : updateOfficeList(currentActivity)){
+                if(office.getOfficeId()==id)names+=office.getName()+" ";
+            }
+        }
+        return names;
     }
 
-    public void setEmplList(List<Employee> emplList) {
-        this.emplList = emplList;
+    public Long[] longArrayPlusOne(Long[] array, Long id){
+        if(array!=null){
+            Long[] newArray = Arrays.copyOf(array, array.length+1);
+            newArray[newArray.length-1] = id;
+            return newArray;
+        }else  return new Long[]{id};
+    }
+
+    public Task getTaskFromServer(Long id){
+        getParams().put(getString(R.string.urlTail), getString(R.string.task_getTask));
+        params.put(getString(R.string.id), String.valueOf(id));
+        return getGson().fromJson(sendRequest(params), Task.class);
+    }
+
+    @Override
+    public void onLowMemory() {
+        L.l("onLowMemory()", this);
+        super.onLowMemory();
+    }
+
+    @Override
+    public void onTerminate() {
+        L.l("onTerminate", this);
+        super.onTerminate();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        L.l("onTrimMemory()+ level = " + level, this);
+        super.onTrimMemory(level);
+    }
+
+
+    //     Getters  Setters
+
+
+    public TypeToken<List<MyEvent>> getMyEventListTypeToken() {
+        return myEventListTypeToken;
+    }
+
+    public TypeToken<Employee> getEmployeeTypeToken() {
+        return employeeTypeToken;
+    }
+
+    public TypeToken<Task> getTaskTypeToken() {
+        return taskTypeToken;
+    }
+
+    public TypeToken<List<Office>> getOfficeListTypeToken() {
+        return officeListTypeToken;
+    }
+
+    public TypeToken<List<Network>> getNetworkListToken() {
+        return networkListToken;
+    }
+
+    public Map<String, String> getParams() {
+        params.clear();
+        return params;
+    }
+
+    public List<Employee> getEmplList() {
+        return emplList;
     }
 
     public List<Network> getNetworkList() {
         return networkList;
     }
 
-    public void setNetworkList(List<Network> networkList) {
-        this.networkList = networkList;
-    }
-
     public List<Task> getTaskList() {
         return taskList;
-    }
-
-    public void setTaskList(List<Task> taskList) {
-        this.taskList = taskList;
     }
 
     public Employee getMe() {
@@ -398,10 +453,6 @@ public class MyApplication extends Application{
         return curNetwork;
     }
 
-    public void setCurNetwork(Network curNetwork) {
-        this.curNetwork = curNetwork;
-    }
-
     public Profile getFbProfile() {
         return fbProfile;
     }
@@ -412,10 +463,6 @@ public class MyApplication extends Application{
 
     public Gson getGson() {
         return gson;
-    }
-
-    public void setGson(Gson gson) {
-        this.gson = gson;
     }
 
     public String getLogin() {
@@ -442,20 +489,8 @@ public class MyApplication extends Application{
         this.employee = employee;
     }
 
-    public FloatingActionButton getFab() {
-        return fab;
-    }
-
-    public void setFab(FloatingActionButton fab) {
-        this.fab = fab;
-    }
-
     public FloatingActionMenu getFaMenu() {
         return faMenu;
-    }
-
-    public void setFaMenu(FloatingActionMenu faMenu) {
-        this.faMenu = faMenu;
     }
 
     public SimpleDateFormat getFormat() {
@@ -464,10 +499,6 @@ public class MyApplication extends Application{
 
     public void setFormat(SimpleDateFormat format) {
         this.format = format;
-    }
-
-    public Activity getCurrentActivity() {
-        return currentActivity;
     }
 
     public void setCurrentActivity(Activity currentActivity) {
@@ -480,5 +511,13 @@ public class MyApplication extends Application{
 
     public void setServiceStarted(boolean serviceStarted) {
         this.serviceStarted = serviceStarted;
+    }
+
+    public boolean isNeedToFinish() {
+        return needToFinish;
+    }
+
+    public void setNeedToFinish(boolean needToFinish) {
+        this.needToFinish = needToFinish;
     }
 }

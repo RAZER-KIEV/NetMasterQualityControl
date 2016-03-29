@@ -73,7 +73,7 @@ public class EmplDetailsFragment extends Fragment  implements View.OnClickListen
         L.l("onActivityCreated", this);
         myApplication = (MyApplication)getActivity().getApplication();
         L.l(myApplication.getMe().toString(), this);
-        if(getPosition()==-1)employee = myApplication.getMe();
+        if(getPosition()==-1)employee = myApplication.getEmplFromServer(myApplication.getMe().getId());
         else employee = myApplication.getEmplList().get(getPosition());
         params = new HashMap<>();
         isMe = myApplication.getMe().equals(employee);

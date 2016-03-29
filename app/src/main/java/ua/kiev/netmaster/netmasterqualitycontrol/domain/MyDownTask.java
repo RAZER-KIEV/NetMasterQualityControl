@@ -32,11 +32,13 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
 
     private Gson gson;
     private Activity activity;
-    private String login, result, inputLine, gsonString, query, password, type, address, title, description, networkName, networkId, owners, networkgson, employee, task, taskId, emlpId, urlStr = "http://195.18.29.171:8082/";//"http://176.37.239.136:8082/";
+    private String login, result, inputLine, id, gsonString, query, password, type, address, latitude, longitude, officeName, title, description, officeId, officeGson,
+            networkName, networkId, owners, networkgson, employee, task, taskId, emlpId, urlStr = "http://195.18.29.171:8082/";
     private final String LOGIN="login", PASSWORD="password", GSONSTRING="gsonString", TITLE="title", DESCRIPTION="description",
-            URLTAIL ="urlTail", EMPLOYEE="employee", TASK="task", EMPLID="emlpId", TASKID="taskId", NETWORKNAME="networkname", NETWORKID="networkId",
-            NETWORKGSON="networkgson", OWNERS="owners", TYPE="type", ADDRESS="address";
-    private Map<String,String> params;
+            URLTAIL ="urlTail", EMPLOYEE="employee", TASK="task", EMPLID="emlpId", TASKID="taskId", NETWORKID="networkId",
+            NETWORKGSON="networkgson", OWNERS="owners", TYPE="type", ADDRESS="address", OFFCIEID="officeId", OFFICEGSON="officeGson", LATITUDE="latitude",
+            LONGITUDE="longitude", NETWORKNAME="networkName", OFFICENAME="officeName", ID="id";
+
     private URL url;
     private HttpURLConnection con;
     private Uri.Builder builder;
@@ -44,11 +46,11 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
     private BufferedWriter writer;
     private BufferedReader in;
     private StringBuilder responses;
-    //public static boolean isReachable;
+
 
     public MyDownTask(Map<String,String> params, Activity activity) {
         this.activity = activity;
-        this.params = params;
+        //this.params = params;
         login = params.get(LOGIN);
         password = params.get(PASSWORD);
         gsonString = params.get(GSONSTRING);
@@ -64,6 +66,12 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         networkgson = params.get(NETWORKGSON);
         type = params.get(TYPE);
         address = params.get(ADDRESS);
+        officeId = params.get(OFFCIEID);
+        officeGson = params.get(OFFICEGSON);
+        officeName= params.get(OFFICENAME);
+        latitude = params.get(LATITUDE);
+        longitude = params.get(LONGITUDE);
+        id = params.get(ID);
         if(params.get(URLTAIL)==null)    choseUrlTail();
         else urlStr+=params.get(URLTAIL);
     }
@@ -81,13 +89,13 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
     @Override
     protected void onPostExecute(String result) {
         L.l("onPostExecute() result = " + result); //// TODO: 15-Mar-16 log to service
-        if(activity!=null && result!=null && result.equals(activity.getString(R.string.server_unreachable))) ErrorDialog(result);
+        if(activity!=null && result!=null && result.equals(activity.getString(R.string.server_unreachable))) errorDialog(result);
         if(activity!=null && result!=null && result.equals("Not authenticated"))L.t("Not authenticated!", activity);
     }
 
     private void choseUrlTail(){
         if(login!=null) urlStr+="authAndroid";
-        if(title!=null) urlStr+="task/addTask";
+        if(title!=null) urlStr+="task/addTask";                 //// TODO: 23-Mar-16  
         if(employee!=null)urlStr+="employee/updateEmpl";
         if(task!=null) urlStr+="task/updateTask";
         if(taskId!=null) urlStr+="task/deleteTask";
@@ -95,7 +103,8 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         if(networkName!=null) urlStr+="network/create";
         if(networkId!=null) urlStr+="network/deleteEmpl";
         if(networkgson!=null) urlStr+="network/update";
-        if(type!=null) urlStr+="task/addTask";
+        if(type!=null) urlStr+="task/addTask";                   // TODO: 23-Mar-16  
+        if(officeName!=null) urlStr+="office/create";
     }
 
     private void appendQueryParameters(){
@@ -114,7 +123,12 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         if(networkgson!=null)builder.appendQueryParameter(NETWORKGSON, networkgson);
         if(type!=null) builder.appendQueryParameter(TYPE,type);
         if(address!=null) builder.appendQueryParameter(ADDRESS, address);
-        //L.l("String query = "+query);
+        if(officeGson!=null) builder.appendQueryParameter(OFFICEGSON, officeGson);
+        if(officeId!=null) builder.appendQueryParameter(OFFCIEID, officeId);
+        if(longitude!=null) builder.appendQueryParameter(LONGITUDE, longitude);
+        if(latitude!=null) builder.appendQueryParameter(LATITUDE, latitude);
+        if(officeName!=null) builder.appendQueryParameter(OFFICENAME, officeName);
+        if(id!=null) builder.appendQueryParameter(ID, id);
     }
 
     private String commonConnect() {
@@ -158,16 +172,15 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
                 con.disconnect();
             }
         }
-        L.l("MyDownTask. NEW COMMON CONNECT! responses.toString() = " + responses.toString());
-        L.l("MyDownTask. NEW COMMON CONNECT! result = " + result);
+        //L.l("MyDownTask. NEW COMMON CONNECT! responses.toString() = " + responses.toString());
+        //L.l("MyDownTask. NEW COMMON CONNECT! result = " + result);
         return result;
     }
 
     private String prepareToParseToGson(String input) {
         int startChar = input.indexOf('[');
         int endChar = input.indexOf(']');
-
-        if(startChar>0&startChar<5) {//// TODO: 25.12.2015  5??? 
+        if(startChar>0&startChar<5) {   // TODO: 25.12.2015  5???
             String res = input.substring(startChar, endChar + 1);
             L.l("MyDownTask. after prepareToParseToGson: " + res);
             return res;
@@ -175,7 +188,7 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
             return input;
     }
 
-    private void ErrorDialog(String description) {
+    private void errorDialog(String description) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(activity);
         alertDialog.setTitle(description+"(");
         alertDialog.setMessage("Please, try to reconnect later.");
@@ -228,18 +241,6 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
     public void setResalt(String resalt) {
         this.result = resalt;
     }
-    /* private void isReachable() throws IOException {
-        Log.d(LoginActivity.LOG, "MyDownTask. isReachable()");
-        String ipAddress = "agromonitor.mechatroniclab.com"; /// todo ???? check string!!!
-        InetAddress inet = InetAddress.getByName(ipAddress);
 
-        if(inet.isReachable(3000)){
-            Log.d(LoginActivity.LOG, ipAddress + " = Host is reachable");
-            isReachable = true;
-        }else {
-            Log.d(LoginActivity.LOG, ipAddress + " = Host is NOT reachable");
-            isReachable = false;
-        }
-    }*/
 }
 

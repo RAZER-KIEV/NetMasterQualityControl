@@ -67,10 +67,9 @@ public class MainActivity extends AppCompatActivity
         CookieHandler.getDefault();
         initViews();
         myApplication = (MyApplication) getApplication();
+        L.l("myApplication.isNeedToFinish() = "+myApplication.isNeedToFinish(), this);
+        if(myApplication.isNeedToFinish()) finish();
         myApplication.setCurrentActivity(this);
-        int taskPos = getIntent().getIntExtra("taskPosition",-1);
-        L.l("taskPos = " + taskPos);
-        if(taskPos>=0) myApplication.commitFragment(TaskDetailsFragment.newInstance(taskPos), getSupportFragmentManager());// TODO: 21-Mar-16 NOT STARTING FRAGMENT!
         myApplication.updateEmplList(this);
         myApplication.updateNetworkList(this);
         myApplication.updateTaskList(this);
@@ -79,7 +78,17 @@ public class MainActivity extends AppCompatActivity
         setFbProfile();
         L.l("MainActivity. onCreate() this.me =" + me);
         serviceStart();
+        choseFragment();
+    }
+
+    private void choseFragment(){
+        int taskPos = getIntent().getIntExtra("task", -1);
+        int emplPos = getIntent().getIntExtra("employee", -1);
+        //int officePos = getIntent().getIntExtra("office", -1);                                                                         //// TODO: 24-Mar-16 make offciedetail fragment
+        L.l("taskPos = "+taskPos+", emplPos = "+emplPos);
         if(taskPos>=0) myApplication.commitFragment(TaskDetailsFragment.newInstance(taskPos), getSupportFragmentManager());
+        else if(emplPos>=0) myApplication.commitFragment(EmplDetailsFragment.newInstance(emplPos), getSupportFragmentManager());
+            //if(officePos>=0) myApplication.commitFragment(OfficeDetailsFragment.newInstance(officePos), getSupportFragmentManager());  //// TODO: 24-Mar-16 make offciedetail fragment
         else myApplication.commitFragment(new TaskFragment(), getSupportFragmentManager());
     }
 
@@ -179,6 +188,8 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         L.l("MainActivity. onResume()");
+        L.l("myApplication.isNeedToFinish() = "+myApplication.isNeedToFinish(), this);
+        if(myApplication.isNeedToFinish()) finish();
     }
 
     @Override
@@ -270,7 +281,8 @@ public class MainActivity extends AppCompatActivity
         getSupportFragmentManager().popBackStackImmediate();
         //myApplication.setMe(null);
         myApplication.setFbProfile(null);
-        super.onBackPressed();
+        myApplication.setNeedToFinish(true);
+        finish();
     }
 
     @Override

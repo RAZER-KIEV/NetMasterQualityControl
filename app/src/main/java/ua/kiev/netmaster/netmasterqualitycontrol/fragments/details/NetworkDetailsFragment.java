@@ -1,6 +1,7 @@
 package ua.kiev.netmaster.netmasterqualitycontrol.fragments.details;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -11,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.identity.intents.AddressConstants;
 import com.oguzdev.circularfloatingactionmenu.library.FloatingActionMenu;
 
 import java.util.Arrays;
@@ -18,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ua.kiev.netmaster.netmasterqualitycontrol.R;
+import ua.kiev.netmaster.netmasterqualitycontrol.activities.MapsActivity;
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Network;
@@ -40,9 +43,7 @@ public class NetworkDetailsFragment extends Fragment implements View.OnClickList
     private EditText network_name_et, network_contacts_et;
     private Button owners_plus_btn, empl_plus_btn, partners_plus_btn, offices_plus_btn;
 
-
     public NetworkDetailsFragment() {}
-
 
     public static NetworkDetailsFragment newInstance(int networkPoss){
         NetworkDetailsFragment networkDetailsFragment = new NetworkDetailsFragment();
@@ -58,8 +59,8 @@ public class NetworkDetailsFragment extends Fragment implements View.OnClickList
             pos = getArguments().getInt("position", -1);
             return pos;
         } else {
-            for(Network ntwrk :myApplication.getNetworkList()){
-                if(network.getNetworkId().equals(myApplication.getMe().getNetworkId())) return pos;
+            for(Network ntwrk :myApplication.updateNetworkList(getActivity())){
+                if(ntwrk.getNetworkId().equals(myApplication.getMe().getNetworkId())) return pos;
                 pos++;
             }
         }
@@ -71,7 +72,6 @@ public class NetworkDetailsFragment extends Fragment implements View.OnClickList
         super.onCreate(savedInstanceState);
         params = new HashMap<>();
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -106,7 +106,7 @@ public class NetworkDetailsFragment extends Fragment implements View.OnClickList
         network_partners_tv = (TextView) rootV.findViewById(R.id.network_partners_tv);
             network_partners_tv.setText(fromLongArrayToNetworkNames(network.getFriendlyNetworks()));
         offices_tv = (TextView) rootV.findViewById(R.id.offices_tv);
-            offices_tv.setText(Arrays.toString(network.getOffices()));
+            offices_tv.setText(myApplication.getOfficeNames(network.getOffices()));
         network_name_et = (EditText) rootV.findViewById(R.id.network_name_et);
             network_name_et.setText(network.getName());
         network_contacts_et = (EditText) rootV.findViewById(R.id.network_contacts_et);
@@ -175,7 +175,6 @@ public class NetworkDetailsFragment extends Fragment implements View.OnClickList
     public void onPause() {
         super.onPause();
     }
-
 
     private Network compileChangedNetwork(){
         // TODO: 11-Mar-16
@@ -250,12 +249,25 @@ public class NetworkDetailsFragment extends Fragment implements View.OnClickList
                     break;
                 case R.id.offices_plus_btn :
                     L.t("add office", getActivity());
+                    officesPlusOneClicked();
                     // TODO: 14-Mar-16
                     break;
             }
         }
     }
 
+    private void officesPlusOneClicked(){
+        Intent intent = new Intent(getActivity(), MapsActivity.class);
+        intent.putExtra("isAddOfficeMode", true);
+        startActivityForResult(intent,1);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        L.l("onActivityResult()", this);
+        L.t("new Office added!", getActivity());
+        myApplication.commitFragment(NetworkDetailsFragment.newInstance(getPosition()),getFragmentManager());
+    }
 
     @Override
     public void onDestroy() {

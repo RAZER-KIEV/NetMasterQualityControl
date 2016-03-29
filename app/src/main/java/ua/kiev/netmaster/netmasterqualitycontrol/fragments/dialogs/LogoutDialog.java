@@ -67,6 +67,7 @@ public class LogoutDialog extends DialogFragment implements View.OnClickListener
             dismiss();
         }
     }
+
     public interface LogoutDialogCommunicator{
         void goToLoginActivity();
     }

@@ -59,7 +59,7 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
     }
 
     int getPosition(){
-        return getArguments().getInt("position",0);
+        return getArguments().getInt("position",-1);
     }
 
     @Nullable
@@ -76,20 +76,17 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
         myApplication = (MyApplication)getActivity().getApplication();
         task = myApplication.getTaskList().get(getPosition());
         myApplication.setCurTask(task);
-        //format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance(); //new SimpleDateFormat("dd-mm-yy hh:mm");
-        params = new HashMap<>();
+        params = myApplication.getParams();
         initViews();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        //myApplication.overrideFab(getActivity(), this);
         faMenu = myApplication.getFaMenu();
     }
 
     private void initViews() {
-        fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         myApplication.overrideFab(getActivity(),this);
         myApplication.setToolbarTitle(task.getTaskType().toString(), getActivity());
         description_et = (EditText) rootV.findViewById(R.id.description_et);
@@ -126,7 +123,6 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //task = myApplication.getCurTask();
                 task.setTaskType(TaskType.values()[position]);
                 myApplication.setCurTask(task);
             }
@@ -177,7 +173,6 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
         super.onStop();
         L.l("onStop", this);
         if(faMenu.isOpen()) faMenu.close(true);
-        fab=null;
     }
 
     @Override
@@ -187,7 +182,7 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
         switch (view.getTag().toString()) {
             case "deleteBtnTag":
                 taskOnClickDeleteParams();
-                L.t("DELETED: "+response, getActivity());
+                L.t("DELETED: " + response, getActivity());
                 myApplication.commitFragment(new TaskFragment(), getFragmentManager());
                 break;
             case "saveBtnTag":
@@ -196,8 +191,8 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
                 break;
             case "acceptBtnTag":
                 taskOnClicAcceptParams();
-                L.t("accepted: " + response, getActivity()); // TODO: 29.12.2015 migrate data setting to server!
-                myApplication.commitFragment(new TaskFragment(), getFragmentManager());
+                L.t("accepted: " + response, getActivity());
+                myApplication.commitFragment(TaskDetailsFragment.newInstance(getPosition()), getFragmentManager());
                 break;
         }
     }
@@ -214,7 +209,7 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
             L.l("NetworkDetailsFragment. taskOnClick()");
             String gString = myApplication.getGson().toJson(compileChangedTask());
             L.l("NetworkDetailsFragment. gString: " + gString);
-            params.put(getString(R.string.task), gString);
+            getParams().put(getString(R.string.task), gString);
             response = myApplication.sendRequest(params);
         } else myApplication.toastNoPermissions();
     }
@@ -222,18 +217,8 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
     private void taskOnClicAcceptParams(){
         if(MySecurity.hasPermissionsToAccept(changedTask, myApplication)) {
             L.l("taskOnClicAcceptParams", this);
-            if (changedTask.getAccepted() == null) {
-                changedTask.setAccepted(new Date());
-                changedTask.setStatus(TaskStatus.INPROCESS);
-            } else if (changedTask.getDone() == null){
-                changedTask.setDone(new Date());
-                changedTask.setStatus(TaskStatus.DONE);
-            }else {
-                L.t("This task is already done!", getActivity());
-                return;
-            }
-            String gString = myApplication.getGson().toJson(changedTask); //!!!!!!!!!!!!!!! changedTask
-            params.put(getString(R.string.task), gString);
+            getParams().put(getString(R.string.urlTail), getString(R.string.task_acceptTask));
+            params.put(getString(R.string.taskId), String.valueOf(changedTask.getTaskId()));
             response = myApplication.sendRequest(params);
         }else myApplication.toastNoPermissions();
     }
@@ -241,17 +226,13 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
     private void taskOnClickDeleteParams(){
         if(MySecurity.hasPermissionsToModify(changedTask, myApplication)){
             L.l("taskOnClickDeleteParams", this);
-            params.put(getString(R.string.taskId), changedTask.getTaskId().toString());
+            getParams().put(getString(R.string.taskId), changedTask.getTaskId().toString());
             response = myApplication.sendRequest(params);
         }else myApplication.toastNoPermissions();
     }
 
-    private Long[] fromStringToLongArr(String string){
-        String[] strArr = string.split(",");
-        Long[] longArr = new Long[strArr.length];
-        for(int i=0; i<strArr.length; i++){
-            if((strArr[i]!=null)&!(strArr[i].equals("null"))) longArr[i]=Long.parseLong(strArr[i].trim()); else longArr[i]=0l;
-        }
-        return longArr;
+    private Map<String, String> getParams() {
+        params.clear();
+        return params;
     }
 }

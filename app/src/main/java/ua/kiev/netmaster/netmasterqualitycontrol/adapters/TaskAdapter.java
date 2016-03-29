@@ -51,10 +51,10 @@ public class TaskAdapter extends BaseAdapter {
 
         String[] datetine = task.getPublished().toString().split(" ");
 
-        ((TextView) view.findViewById(R.id.name_time2)).setText(datetine[0]+" "+datetine[1]+" "+datetine[2]+" "+datetine[3]);
-        ((TextView) view.findViewById(R.id.isbusy_priority2)).setText("priority: "+task.getPriority());
-        ((TextView) view.findViewById(R.id.lastOnline_Adress2)).setText(task.getAddress());
-        ((TextView) view.findViewById(R.id.tel_description2)).setText(task.getDescription());
+        ((TextView) view.findViewById(R.id.left_top)).setText(datetine[0]+" "+datetine[1]+" "+datetine[2]+" "+datetine[3]);
+        ((TextView) view.findViewById(R.id.left_bott)).setText("priority: "+task.getPriority());
+        ((TextView) view.findViewById(R.id.right_top)).setText(task.getAddress());
+        ((TextView) view.findViewById(R.id.right_bott)).setText(task.getDescription());
         return view;
     }
 

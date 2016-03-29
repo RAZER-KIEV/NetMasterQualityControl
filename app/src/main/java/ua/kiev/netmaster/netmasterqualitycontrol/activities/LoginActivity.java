@@ -187,12 +187,14 @@ public class LoginActivity extends Activity implements CreateRegisterDialog.Regi
         super.onResume();
         showProgress(false);
         access = null;
+
         L.l("LoginActivity. onResume()");
     }
 
     private void attemptLogin(){
         L.l("LoginActivity. attemptLogin()");
         // Reset errors.
+        myApplication.setNeedToFinish(false);
         loginView.setError(null);
         mPasswordView.setError(null);
 

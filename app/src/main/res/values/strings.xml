@@ -97,5 +97,9 @@
     <string name="TaskDetailsFragment">TaskDetailsFragment</string>
     <string name="EmplDetailsFragment">EmplDetailsFragment</string>
     <string name="employees">Employees</string>
+    <string name="create_new_office">Create new Office?</string>
+    <string name="office_getAll">office/getAll</string>
+    <string name="task_getTask">task/getTask</string>
+    <string name="task_acceptTask">task/acceptTask</string>
 
 </resources>

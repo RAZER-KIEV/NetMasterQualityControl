@@ -20,6 +20,6 @@ public class OwnIconRendered extends DefaultClusterRenderer<AbstractMarker> {
 
     @Override
     protected void onBeforeClusterItemRendered(AbstractMarker item, MarkerOptions markerOptions) {
-        markerOptions.icon(item.getMarker().getIcon());
+        markerOptions.icon(item.getMarker().getIcon()).anchor(0.5f,0.5f);
     }
 }

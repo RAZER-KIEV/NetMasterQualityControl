@@ -1,50 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/items_shape_rounded"
     android:padding="@dimen/item_padding">
 
     <TextView
-        android:layout_width="@dimen/item2Width140"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/name_time2"
-        android:layout_row="0"
-        android:layout_column="0"
-        android:layout_gravity="left"
+        android:id="@+id/left_top"
+        android:layout_gravity="left|top"
         android:textColor="@color/primary_text"
-        android:paddingLeft="@dimen/editText_field_dimen_3dp"/>
+        android:paddingLeft="@dimen/editText_field_dimen_3dp"
+        android:text="1111111111111111"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/right_top"
+        android:layout_toRightOf="@+id/imageView_item2"
+        android:layout_toEndOf="@+id/imageView_item2" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/lastOnline_Adress2"
-        android:layout_row="0"
-        android:layout_column="1"
+        android:id="@+id/right_top"
         android:layout_gravity="left|right"
         android:textColor="@color/primary_text"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:text="Priority: Norm"
+        android:layout_alignBottom="@+id/left_top" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/left_bott"
+        android:layout_gravity="left|right"
+        android:textColor="@color/primary_text"
+        android:paddingLeft="@dimen/editText_field_dimen_3dp"
+        android:text="22222222222"
+        android:layout_alignBaseline="@+id/right_bott"
+        android:layout_alignBottom="@+id/right_bott"
+        android:layout_toRightOf="@+id/imageView_item2"
+        android:layout_toEndOf="@+id/imageView_item2" />
+
+    <ImageView
+        android:layout_width="33dp"
+        android:layout_height="33dp"
+        android:id="@+id/imageView_item2"
         />
 
     <TextView
-        android:layout_width="@dimen/item2Width140"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/isbusy_priority2"
-        android:layout_row="1"
-        android:layout_column="0"
-        android:layout_gravity="left|right"
-        android:textColor="@color/primary_text"
-        android:paddingLeft="@dimen/editText_field_dimen_3dp"/>
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/tel_description2"
-        android:layout_row="1"
-        android:layout_column="1"
-        android:layout_gravity="left|right"
-        android:textColor="@color/primary_text" />
-</GridLayout>
+        android:id="@+id/right_bott"
+        android:textColor="@color/primary_text"
+        android:text="Status: INPROCESS"
+        android:layout_below="@+id/right_top"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+</RelativeLayout>

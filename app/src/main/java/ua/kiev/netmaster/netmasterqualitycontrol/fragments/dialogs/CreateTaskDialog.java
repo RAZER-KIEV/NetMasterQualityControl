@@ -38,6 +38,7 @@ public class CreateTaskDialog extends DialogFragment implements View.OnClickList
 
     @Override
     public void onAttach(Activity activity) {
+        L.l("onAttach()",this);
         super.onAttach(activity);
         addTaskDialogCommunicator = (AddTaskDialogCommunicator) activity;
         myApplication = (MyApplication) activity.getApplication();
@@ -48,6 +49,7 @@ public class CreateTaskDialog extends DialogFragment implements View.OnClickList
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        L.l("onCreateDialog()",this);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.addtask_dialog, null);
         create = (Button)view.findViewById(R.id.create_dialog);
@@ -67,6 +69,7 @@ public class CreateTaskDialog extends DialogFragment implements View.OnClickList
     }
 
     private void prepareSpinner(){
+        L.l("prepareSpinner()",this);
         ArrayAdapter<TaskType> adapter = new ArrayAdapter<>(getContext(), R.layout.sppiner_item, TaskType.values());
         adapter.setDropDownViewResource(R.layout.sppiner_item);
         taskTypeSpinner.setAdapter(adapter);
@@ -88,7 +91,9 @@ public class CreateTaskDialog extends DialogFragment implements View.OnClickList
 
     @Override
     public void onClick(View view) {
+        L.l("onClick()",this);
         if(view.getId()==R.id.create_dialog){
+            L.l("Create Button clicked()",this);
             //titleStr = title.getText().toString();
             addressStr = descripton.getText().toString();
             addTaskDialogCommunicator.onAddTaskDialogData(taskType, addressStr);
@@ -98,7 +103,8 @@ public class CreateTaskDialog extends DialogFragment implements View.OnClickList
             Task task = myApplication.getGson().fromJson(myApplication.sendRequest(params), Task.class);
             myApplication.setCurTask(task);
             dismiss();
-        }else {
+        }else if(view.getId()==R.id.cancel_dialog){
+            L.l("Cancel Button clicked()",this);
             dismiss();
         }
     }
