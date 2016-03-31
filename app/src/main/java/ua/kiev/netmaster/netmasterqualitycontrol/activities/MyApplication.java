@@ -352,9 +352,11 @@ public class MyApplication extends Application{
 
     public String getOfficeNames(Long[] ids){
         String names="";
+        if(ids!=null){
         for(Long id: ids){
-            for(Office office  : updateOfficeList(currentActivity)){
-                if(office.getOfficeId()==id)names+=office.getName()+" ";
+                for(Office office  : updateOfficeList(currentActivity)){
+                    if(office.getOfficeId()==id)names+=office.getName()+" ";
+                }
             }
         }
         return names;

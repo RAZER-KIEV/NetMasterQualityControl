@@ -101,5 +101,6 @@
     <string name="office_getAll">office/getAll</string>
     <string name="task_getTask">task/getTask</string>
     <string name="task_acceptTask">task/acceptTask</string>
+    <string name="network_create">network/create</string>
 
 </resources>

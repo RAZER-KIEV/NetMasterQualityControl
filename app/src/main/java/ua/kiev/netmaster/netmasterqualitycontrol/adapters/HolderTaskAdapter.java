@@ -100,7 +100,7 @@ public class HolderTaskAdapter  extends BaseAdapter{
                 myViewHolder.imageView.setBackground(ContextCompat.getDrawable(ctx, R.mipmap.task_icon));
                 break;
             case OTHER:
-                myViewHolder.imageView.setBackground(ContextCompat.getDrawable(ctx, R.mipmap.userconn_icon));
+                myViewHolder.imageView.setBackground(ContextCompat.getDrawable(ctx, R.mipmap.other_task));
                 break;
             case CABLE_INSTALL:
                 myViewHolder.imageView.setBackground(ContextCompat.getDrawable(ctx, R.mipmap.cable_install));

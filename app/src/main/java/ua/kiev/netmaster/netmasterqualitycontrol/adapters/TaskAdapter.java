@@ -15,6 +15,7 @@ import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
 /**
  * Created by ПК on 15.12.2015.
  */
+@Deprecated
 public class TaskAdapter extends BaseAdapter {
 
     private Context ctx;

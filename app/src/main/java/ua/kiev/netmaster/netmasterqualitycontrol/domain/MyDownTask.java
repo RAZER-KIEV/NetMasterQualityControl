@@ -37,7 +37,7 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
     private final String LOGIN="login", PASSWORD="password", GSONSTRING="gsonString", TITLE="title", DESCRIPTION="description",
             URLTAIL ="urlTail", EMPLOYEE="employee", TASK="task", EMPLID="emlpId", TASKID="taskId", NETWORKID="networkId",
             NETWORKGSON="networkgson", OWNERS="owners", TYPE="type", ADDRESS="address", OFFCIEID="officeId", OFFICEGSON="officeGson", LATITUDE="latitude",
-            LONGITUDE="longitude", NETWORKNAME="networkName", OFFICENAME="officeName", ID="id";
+            LONGITUDE="longitude", NETWORKNAME="networkname", OFFICENAME="officeName", ID="id";
 
     private URL url;
     private HttpURLConnection con;
@@ -64,6 +64,7 @@ public class MyDownTask extends AsyncTask<Void, Void, String>{
         owners = params.get(OWNERS);
         networkId = params.get(NETWORKID);
         networkgson = params.get(NETWORKGSON);
+
         type = params.get(TYPE);
         address = params.get(ADDRESS);
         officeId = params.get(OFFCIEID);

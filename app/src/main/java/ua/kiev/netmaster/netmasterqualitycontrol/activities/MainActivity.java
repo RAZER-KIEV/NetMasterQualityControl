@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity
         L.l("MainActivity. onCreate() this.me =" + me);
         serviceStart();
         choseFragment();
+        params = new HashMap<>();
     }
 
     private void choseFragment(){
@@ -292,7 +293,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void registerDialogData(String login, String password) {
-        params = new HashMap<>();
+        params.clear();
         params.put(getString(R.string.urlTail), getString(R.string.addEmpl));
         params.put(getString(R.string.login),login);
         params.put(getString(R.string.password), password);
@@ -307,7 +308,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void addEmplToMyNetwork(Long emplId) {
-        params = new HashMap<>();
+        params.clear();
         params.put(getString(R.string.urlTail),getString(R.string.network_addEmployeeToMyNetwork));
         params.put(getString(R.string.emlpId), String.valueOf(emplId));
         try {
@@ -321,9 +322,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onCreateNetworkDialogData(String title) {
-        params = new HashMap<>();
+        params.clear();
         params.put(getString(R.string.networkname),title);
-        params.put(getString(R.string.owners), String.valueOf(myApplication.getMe().getId()));
+        params.put(getString(R.string.urlTail), getString(R.string.network_create));
         try {
             String res = new MyDownTask(params, this).execute().get();
             L.t("Network created: "+res,this);

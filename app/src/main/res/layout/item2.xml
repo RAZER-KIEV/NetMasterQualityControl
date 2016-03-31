@@ -5,46 +5,59 @@
     android:background="@drawable/items_shape_rounded"
     android:padding="@dimen/item_padding">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <TableRow
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/left_top"
-        android:layout_gravity="left|top"
-        android:textColor="@color/primary_text"
-        android:paddingLeft="@dimen/editText_field_dimen_3dp"
-        android:text="1111111111111111"
-        android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/right_top"
+        android:id="@+id/tableRow16"
         android:layout_toRightOf="@+id/imageView_item2"
-        android:layout_toEndOf="@+id/imageView_item2" />
+        android:layout_toEndOf="@+id/imageView_item2">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/right_top"
-        android:layout_gravity="left|right"
-        android:textColor="@color/primary_text"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:text="Priority: Norm"
-        android:layout_alignBottom="@+id/left_top" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/left_top"
+            android:textColor="@color/primary_text"
+            android:paddingLeft="@dimen/editText_field_dimen_3dp"
+            android:text="1111111111111111"
+            android:layout_weight="0.1" />
 
-    <TextView
-        android:layout_width="wrap_content"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/right_top"
+            android:layout_gravity="left|top"
+            android:textColor="@color/primary_text"
+            android:text="Priority: Norm"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/left_bott"
-        android:layout_gravity="left|right"
-        android:textColor="@color/primary_text"
-        android:paddingLeft="@dimen/editText_field_dimen_3dp"
-        android:text="22222222222"
-        android:layout_alignBaseline="@+id/right_bott"
-        android:layout_alignBottom="@+id/right_bott"
-        android:layout_toRightOf="@+id/imageView_item2"
-        android:layout_toEndOf="@+id/imageView_item2" />
+        android:layout_below="@+id/tableRow16"
+        android:layout_alignLeft="@+id/tableRow16"
+        android:layout_alignStart="@+id/tableRow16">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/left_bott"
+            android:textColor="@color/primary_text"
+            android:paddingLeft="@dimen/editText_field_dimen_3dp"
+            android:text="22222222222"
+            android:layout_weight=".1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/right_bott"
+            android:textColor="@color/primary_text"
+            android:text="Status: INPROCESS"
+            />
+    </TableRow>
 
     <ImageView
         android:layout_width="33dp"
@@ -52,14 +65,4 @@
         android:id="@+id/imageView_item2"
         />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:id="@+id/right_bott"
-        android:textColor="@color/primary_text"
-        android:text="Status: INPROCESS"
-        android:layout_below="@+id/right_top"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
 </RelativeLayout>
