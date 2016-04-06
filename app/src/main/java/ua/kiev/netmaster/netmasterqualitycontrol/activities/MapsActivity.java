@@ -37,6 +37,7 @@ import ua.kiev.netmaster.netmasterqualitycontrol.domain.maps.OwnIconRendered;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.maps.AbstractMarker;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Task;
 import ua.kiev.netmaster.netmasterqualitycontrol.enums.EmplPossition;
+import ua.kiev.netmaster.netmasterqualitycontrol.enums.TaskStatus;
 import ua.kiev.netmaster.netmasterqualitycontrol.enums.TaskType;
 import ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs.CreateOfficeDialog;
 import ua.kiev.netmaster.netmasterqualitycontrol.fragments.dialogs.CreateTaskDialog;
@@ -194,7 +195,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void addTasksToMap() {
         for(Task task: taskList){
             try {
-                if(task.getLatitude()==null) continue;
+                if(task.getLatitude()==null||task.getStatus()== TaskStatus.DONE) continue;
                 MarkerOptions marker = new MarkerOptions().position(getLatLng(task.getLatitude(), task.getLongitude())).icon(getIcon(task));
                // marker.snippet("Priority - "+task.getPriority()+";\n Description - "+task.getDescription());
                 //mMap.addMarker(marker);

@@ -1,6 +1,7 @@
 package ua.kiev.netmaster.netmasterqualitycontrol.fragments.details;
 
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -49,6 +50,7 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
     private Task changedTask;
     private Map<String,String> params;
     private String response;
+    private float distance[];
 
     public static TaskDetailsFragment newInstance (int position){
         TaskDetailsFragment taskDetailsFragment = new TaskDetailsFragment();
@@ -190,7 +192,7 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
                 L.t("saved: "+response, getActivity());
                 break;
             case "acceptBtnTag":
-                taskOnClicAcceptParams();
+                taskOnClickAcceptParams();
                 L.t("accepted: " + response, getActivity());
                 myApplication.commitFragment(TaskDetailsFragment.newInstance(getPosition()), getFragmentManager());
                 break;
@@ -198,9 +200,8 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
     }
 
     private Task compileChangedTask(){
-        changedTask = new Task(task.getTaskId(), task.getNetworkId(), task.getExecuterIds(), task.getTaskType(),description_et.getText().toString(),
-                address_et.getText().toString(),task.getLatitude(), task.getLongitude(), task.getPublished(), task.getAccepted(), task.getDone(),
-                task.getStatus(),task.getPriority());
+        changedTask.setAddress( address_et.getText().toString());
+        changedTask.setDescription(description_et.getText().toString());
         L.l("NetworkDetailsFragment. change Task" + changedTask.toString());
         return changedTask;
     }
@@ -214,7 +215,7 @@ public class TaskDetailsFragment extends Fragment implements View.OnClickListene
         } else myApplication.toastNoPermissions();
     }
 
-    private void taskOnClicAcceptParams(){
+    private void taskOnClickAcceptParams(){
         if(MySecurity.hasPermissionsToAccept(changedTask, myApplication)) {
             L.l("taskOnClicAcceptParams", this);
             getParams().put(getString(R.string.urlTail), getString(R.string.task_acceptTask));

@@ -1,5 +1,7 @@
 package ua.kiev.netmaster.netmasterqualitycontrol.sequrity;
 
+import android.location.Location;
+
 import ua.kiev.netmaster.netmasterqualitycontrol.activities.MyApplication;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Employee;
 import ua.kiev.netmaster.netmasterqualitycontrol.domain.Network;
@@ -13,7 +15,7 @@ import ua.kiev.netmaster.netmasterqualitycontrol.loger.L;
 public class MySecurity {
     public static final String errorMessage="You haven't permissions";
     //public static MyApplication myApplication;
-    private static boolean IamSuperadmin, IamAdmin, HeisAdmin, HeisTechnician, areWeInOneNetwork , changeMyself, iAmMajor;
+    private static boolean IamSuperadmin, IamAdmin, HeisAdmin, HeisTechnician, areWeInOneNetwork , changeMyself, iAmMajor, amIOneOfExec, isItDoneAcception;
 
     public static boolean hasPermissionsToModify(Object o, MyApplication myApp){
 
@@ -40,7 +42,23 @@ public class MySecurity {
     }
 
     public static boolean hasPermissionsToAccept(Task task, MyApplication myApp){
-        if(task.getNetworkId().equals(myApp.getMe().getNetworkId())){
+        Employee me = myApp.getMe();
+        areWeInOneNetwork = task.getNetworkId().equals(myApp.getMe().getNetworkId());
+        if(areWeInOneNetwork){
+            isItDoneAcception =task.getLatitude()!=null && task.getAccepted()!=null && task.getDone()==null;
+            if(isItDoneAcception){
+                for(Long id : task.getExecuterIds()){
+                    if (me.getId()== id) amIOneOfExec = true;
+                    break;
+                }
+                if(amIOneOfExec){
+                    float[] distance = new float[1];
+                    Location.distanceBetween(me.getLastLat(), me.getLastLong(), task.getLatitude(), task.getLongitude(), distance);
+                        if (distance[0] >= 300.0f) {
+                            return false;
+                    }
+                }else return false;
+            }
             return true;
         }else return false;
     }
